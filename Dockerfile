@@ -44,8 +44,10 @@ RUN apt-get install -y --fix-broken
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
-# Expose Gazebo default port
-EXPOSE 11345
+
+# Create a catkin workspace
+WORKDIR /home
+RUN mkdir -p /home/catkin_ws/src
 
 # Start a shell by default
 CMD ["bash"]

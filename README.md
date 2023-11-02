@@ -1,7 +1,13 @@
 # TII_Polaris_Simulation
 
+## Container
+- Build
 docker build -t ros-gazebo-nvidia-tii:20.04 .
 
+- Run
+    ./run.sh ${PATH_TO_REPO}/gazebo_workshop/Project_1-Building/ ros-gazebo-nvidia-tii:20.04
+
+    ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation ros-gazebo-nvidia-tii:20.04
 
 ## Requirements
 1. Development of Path-Tracking Algorithm
