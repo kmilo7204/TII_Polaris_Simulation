@@ -7,7 +7,10 @@ docker build -t ros-gazebo-nvidia-tii:20.04 .
 - Run
     ./run.sh ${PATH_TO_REPO}/gazebo_workshop/Project_1-Building/ ros-gazebo-nvidia-tii:20.04
 
-    ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation ros-gazebo-nvidia-tii:20.04
+    ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src ros-gazebo-nvidia-tii:20.04
+
+
+roslaunch gem_gazebo gem_gazebo_rviz.launch velodyne_points:="true"
 
 ## Requirements
 1. Development of Path-Tracking Algorithm
