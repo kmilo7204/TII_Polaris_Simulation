@@ -15,9 +15,10 @@ PathGenerator:: PathGenerator()
   path_pub_ = nh.advertise<nav_msgs::Path>("/path", 1);
 }
 
+
 nav_msgs::Path PathGenerator::readWaypoints()
 {
-  std::string filename = ros::package::getPath("path_generator") + "/files/wps.csv";
+  std::string filename = ros::package::getPath("path_generator") + "/files/wps_modified.csv";
   std::ifstream file(filename);
 
   nav_msgs::Path path_msg;
@@ -65,21 +66,26 @@ void PathGenerator::publish()
   path_msg.header.stamp = ros::Time::now();
 
   ROS_INFO("Publishing path into /path topic");
-  path_pub_.publish(path_msg);
+
+  if (pub_ctr < 2)
+  {
+    path_pub_.publish(path_msg);
+    pub_ctr++;
+  }
 }
 
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "path_generator_node");
-    PathGenerator path_generator;
-    ros::Rate rate(1);
+  ros::init(argc, argv, "path_generator_node");
+  PathGenerator path_generator;
+  ros::Rate rate(1);
 
-    while (ros::ok())
-    {
-      path_generator.publish();
-      ros::spinOnce();
-      rate.sleep();
-    }
-    return 0;
+  while (ros::ok())
+  {
+    path_generator.publish();
+    ros::spinOnce();
+    rate.sleep();
+  }
+  return 0;
 }

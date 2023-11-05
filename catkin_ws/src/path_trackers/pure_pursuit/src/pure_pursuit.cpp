@@ -24,17 +24,6 @@ PurePursuit::PurePursuit()
   gps_subscriber_ = nh.subscribe("/path", 1, &PurePursuit::pathCallback, this);
 
   ackermann_pub_ = nh.advertise<ackermann_msgs::AckermannDrive>("/gem/ackermann_cmd", 1);
-
-  // self.rate       = rospy.Rate(20)
-  // self.look_ahead = 6    # meters
-  // self.wheelbase  = 1.75 # meters
-  // self.goal       = 0
-  // self.read_waypoints() # read waypoints
-  // self.ackermann_msg = AckermannDrive()
-  // self.ackermann_msg.steering_angle_velocity = 0.0
-  // self.ackermann_msg.acceleration            = 0.0
-  // self.ackermann_msg.jerk                    = 0.0
-  // self.ackermann_msg.speed                   = 0.0
 }
 
 std::tuple<double, double, double> PurePursuit::quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
@@ -45,138 +34,169 @@ std::tuple<double, double, double> PurePursuit::quaternionToEulerAngles(const ge
     double pitch;
     double yaw;
     tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
-    ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
+    // ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
 
     std::tuple<double, double, double> { roll, pitch, yaw };
 }
 
 void PurePursuit::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 {
-  // ROS_INFO("Receiving information in odom message");
-  // double x_pos = odom_msg->pose.pose.position.x;
-  // double y_pos = odom_msg->pose.pose.position.y;
-  // ROS_INFO("Printing position. X:%f, Y:%f", x_pos, y_pos);
   odom_.pose = odom_msg->pose;
 }
 
 void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
   ROS_INFO("Receiving information in path message");
-  path_ = *path_msg;
+  // path_ = *path_msg;
   path_vct_ = path_msg->poses;
+  for (geometry_msgs::PoseStamped pose_stp : path_vct_)
+  {
+    double x = pose_stp.pose.position.x;
+    double y = pose_stp.pose.position.y;
+
+    ROS_INFO("X: %f, Y: %f", x, y);
+  }
 }
 
-// void PurePursuit:dist();
+double PurePursuit::find_angle(const std::vector<double>& v1, const std::vector<double>& v2)
+{
+  // Calculate the angle between two vectors v1 and v2
+  double dot_product = v1[0] * v2[0] + v1[1] * v2[1];
+  double magnitude_v1 = std::sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+  double magnitude_v2 = std::sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+  return std::acos(dot_product / (magnitude_v1 * magnitude_v2));
+}
 
 
 void PurePursuit::process()
 {
+  // ROS_INFO("Process init");
   std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
 
-  // get current position and orientation in the world frame
-  // curr_x, curr_y, curr_yaw = self.get_gem_pose()
   double curr_x = odom_.pose.pose.position.x;
   double curr_y = odom_.pose.pose.position.y;
   double curr_yaw = std::get<2>(euler_angles);
+  ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
 
   std::vector<double> dist_vct;
-  dist_vct.reserve(path_vct_.size();)
-  int idx = 0;
+  ROS_INFO("Path size: %d", path_vct_.size());
+  dist_vct.reserve(path_vct_.size());
 
+  // ROS_INFO("Dist size: %d", dist_vct.size());
   // Since we dont know what is the lower distance, we need to find it out.
+  int idx = 0;
   for (const geometry_msgs::PoseStamped& pose_stamped : path_vct_)
   {
-    pose_stamped.pose.position.x;
-    pose_stamped.pose.position.y;
-    dist_vct[idx] = sqrt(pow(pose_stamped.pose.position.x - curr_x, 2) + pow(pose_stamped.pose.position.y - curr_y, 2));
+    double dist = sqrt(pow(pose_stamped.pose.position.x - curr_x, 2) + pow(pose_stamped.pose.position.y - curr_y, 2));
+    // ROS_INFO("Distance: %f", dist);
+    dist_vct.push_back(dist);
     idx++;
   }
 
+  // ROS_INFO("Distance found: %f", dist_vct[idx]);
   std::vector<int> goal_vct;
   for (int i = 0; i < dist_vct.size(); i++)
   {
+    // ROS_INFO("Distance-i: %f", dist_vct[i]);
+    // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
+    // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
+
     if (dist_vct[i] >= look_ahead_dist_ - 3.0 && dist_vct[i] <= look_ahead_dist_ + 3.0)
     {
+      // ROS_INFO("TRUE");
+
       // Store the index of the matching element
       goal_vct.push_back(i);
     }
   }
 
-  for (int idx : goal_arr)
+  ROS_INFO("Goals processed: %d", goal_vct.size());
+
+
+  int goal = -1;
+  for (int idx : goal_vct)
   {
     std::vector<double> v1 = {dist_vct[idx] - curr_x, dist_vct[idx] - curr_y};
     std::vector<double> v2 = {std::cos(curr_yaw), std::sin(curr_yaw)};
 
     double temp_angle = find_angle(v1, v2);
 
-    if (std::abs(temp_angle) < M_PI / 2) {
-        goal = idx;
-        break;
+    if (std::abs(temp_angle) < M_PI / 2)
+    {
+      goal = idx;
+      break;
     }
   }
 
+  ackermann_msgs::AckermannDrive ackermann_cmd;
+  ackermann_cmd.speed = 0.0;
+  ackermann_cmd.steering_angle = 0.0;
 
-//             # finding those points which are less than the look ahead distance (will be behind and ahead of the vehicle)
-//             goal_arr = np.where( (self.dist_arr < self.look_ahead + 0.3) & (self.dist_arr > self.look_ahead - 0.3) )[0]
+  if (goal != -1)
+  {
+    ROS_INFO("Goal index: %x", goal);
 
-//             # finding the goal point which is the last in the set of points less than the lookahead distance
-//             for idx in goal_arr:
-//                 v1 = [self.path_points_x[idx]-curr_x , self.path_points_y[idx]-curr_y]
-//                 v2 = [np.cos(curr_yaw), np.sin(curr_yaw)]
-//                 temp_angle = self.find_angle(v1,v2)
-//                 if abs(temp_angle) < np.pi/2:
-//                     self.goal = idx
-//                     break
+    double l = dist_vct[goal];
+    geometry_msgs::PoseStamped target_pose = path_vct_[goal];
+    double xc = target_pose.pose.position.x - curr_x;
+    double yc = target_pose.pose.position.y - curr_y;
 
-//             # finding the distance between the goal point and the vehicle
-//             # true look-ahead distance between a waypoint and current position
-//             L = self.dist_arr[self.goal]
+    // double goal_x_veh_coord = (xc * std::cos(curr_yaw)) + (yc * std::sin(curr_yaw));
+    // double goal_y_veh_coord = (yc * std::cos(curr_yaw)) - (xc * std::sin(curr_yaw));
 
-//             # transforming the goal point into the vehicle coordinate frame 
-//             gvcx = self.path_points_x[self.goal] - curr_x
-//             gvcy = self.path_points_y[self.goal] - curr_y
-//             goal_x_veh_coord = gvcx*np.cos(curr_yaw) + gvcy*np.sin(curr_yaw)
-//             goal_y_veh_coord = gvcy*np.cos(curr_yaw) - gvcx*np.sin(curr_yaw)
+    // Find the curvature
+    std::tuple<double, double, double> goal_angles = quaternionToEulerAngles(target_pose.pose.orientation);
 
-//             # find the curvature and the angle 
-//             alpha   = self.path_points_yaw[self.goal] - (curr_yaw)
-//             k       = 0.285
-//             angle_i = math.atan((2 * k * self.wheelbase * math.sin(alpha)) / L) 
-//             angle   = angle_i*2
-//             angle   = round(np.clip(angle, -0.61, 0.61), 3)
+    double goal_yaw = std::get<2>(goal_angles);
+    ROS_INFO("Goal yaw: %f", goal_yaw);
 
-//             ct_error = round(np.sin(alpha) * L, 3)
+    double alpha = goal_yaw - curr_yaw;
+    ROS_INFO("Alpha: %f", alpha);
 
-//             print("Crosstrack Error: " + str(ct_error))
+    double k = 0.285;
+    double wheelbase = 1.75;
+    double angle_i = std::atan((2 * k * wheelbase * std::sin(alpha)) / l);
+    ROS_INFO("Angle i: %f", angle_i);
 
-//             # implement constant pure pursuit controller
-//             self.ackermann_msg.speed          = 2.8
-//             self.ackermann_msg.steering_angle = angle
-//             self.ackermann_pub.publish(self.ackermann_msg)
+    double angle = angle_i * 2;
 
-//             self.rate.sleep()
+    double ct_error = std::sin(alpha) * l;
+
+    ROS_INFO("CTE: %f", ct_error);
+
+    // Publish control commands
+    ackermann_cmd.speed = 1.5;
+    ackermann_cmd.steering_angle = angle;
+  }
+  ROS_INFO("Publishing velocity");
+  // Set control_command values as needed
+  ackermann_pub_.publish(ackermann_cmd);
 }
-
 
 
 void PurePursuit::run()
 {
   ros::Rate rate(10);
-  // readWaypoints();
 
   ROS_INFO("In run()");
   while (ros::ok())
   {
-      // Publish control commands
-      ackermann_msgs::AckermannDrive ackermann_cmd;
-      // This is working
-      ackermann_cmd.speed = 5.1;
-      // ROS_INFO("Publishing velocity");
-      // Set control_command values as needed
-      ackermann_pub_.publish(ackermann_cmd);
+    // Publish control commands
+    // ackermann_msgs::AckermannDrive ackermann_cmd;
+    // This is working
+    // ackermann_cmd.speed = 0.0;
+    // ROS_INFO("Publishing velocity");
+    // Set control_command values as needed
+    // ackermann_pub_.publish(ackermann_cmd);
 
-      ros::spinOnce();
-      rate.sleep();
+    // Lets do some test
+    if (path_vct_.size() > 0)
+    {
+      process();
+    }
+
+    ros::spinOnce();
+    rate.sleep();
   }
 }
 

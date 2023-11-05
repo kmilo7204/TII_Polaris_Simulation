@@ -14,6 +14,8 @@ public:
   nav_msgs::Path readWaypoints();
   void publish();
 
+  int pub_ctr = 0;
+
 private:
     ros::Publisher path_pub_;
 };

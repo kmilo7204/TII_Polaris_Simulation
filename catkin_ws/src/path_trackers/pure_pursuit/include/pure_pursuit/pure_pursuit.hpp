@@ -16,6 +16,7 @@ public:
 
 private:
     std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion);
+    double find_angle(const std::vector<double>& v1, const std::vector<double>& v2);
 
 private:
     // Subscribers
@@ -37,7 +38,9 @@ private:
     std::vector<double> path_points_yaw_;
     std::vector<double> dist_arr_;
 
-    double look_ahead_dist_ {6.0};
+    // double look_ahead_dist_ {6.0};
+    double look_ahead_dist_ {4.5};
+
 };
 
 #endif
