@@ -6,6 +6,15 @@
 #include <iostream>
 #include <ros/package.h>
 
+#include <cmath>
+
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <geometry_msgs/Quaternion.h>
+
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 PurePursuit::PurePursuit()
 {
   // Initialize ROS node
@@ -28,6 +37,19 @@ PurePursuit::PurePursuit()
   // self.ackermann_msg.speed                   = 0.0
 }
 
+std::tuple<double, double, double> PurePursuit::quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
+{
+    tf2::Quaternion tf_quaternion;
+    tf2::fromMsg(quaternion, tf_quaternion);
+    double roll;
+    double pitch;
+    double yaw;
+    tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
+    ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
+
+    std::tuple<double, double, double> { roll, pitch, yaw };
+}
+
 void PurePursuit::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 {
   // ROS_INFO("Receiving information in odom message");
@@ -39,72 +61,60 @@ void PurePursuit::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 
 void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
-  std::vector<geometry_msgs::Pose> poses_vct;
-  for (const geometry_msgs::PoseStamped& pose : path_msg->poses)
-  {
-    poses_vct.push_back(pose.pose);
-    // path_points_x_.push_back(std::get<0>(point));
-    // path_points_y_.push_back(std::get<1>(point));
-    // path_points_yaw_.push_back(std::get<2>(point));
-  }
   ROS_INFO("Receiving information in path message");
-  path_msg->poses;
+  path_ = *path_msg;
+  path_vct_ = path_msg->poses;
 }
 
-// void PurePursuit::readWaypoints()
-// {
-//   std::string filename = ros::package::getPath("pure_pursuit") + "/src/wps.csv";
-//   ROS_INFO("Filename: %s", filename.c_str());
-//   std::ifstream file(filename);
+// void PurePursuit:dist();
 
-//   if (!file.is_open())
-//   {
-//     std::cerr << "Error: Unable to open waypoints file " << filename << std::endl;
-//     return;
-//   }
-
-//   std::vector<std::tuple<double, double, double>> path_points;
-//   std::string line;
-
-//   while (std::getline(file, line))
-//   {
-//     std::istringstream ss(line);
-//     double x, y, yaw;
-//     if (ss >> x >> y >> yaw)
-//     {
-//       path_points.emplace_back(x, y, yaw);
-//     }
-//   }
-
-//   // Turn path_points into separate arrays
-//   path_points_x_.clear();
-//   path_points_y_.clear();
-//   path_points_yaw_.clear();
-//   dist_arr_.resize(path_points.size(), 0.0);
-
-//   for (const auto& point : path_points)
-//   {
-//     ROS_INFO("Read point: x=%f, y=%f, yaw=%f", std::get<0>(point), std::get<1>(point), std::get<2>(point));
-//     path_points_x_.push_back(std::get<0>(point));
-//     path_points_y_.push_back(std::get<1>(point));
-//     path_points_yaw_.push_back(std::get<2>(point));
-//   }
-// }
 
 void PurePursuit::process()
 {
+  std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
 
+  // get current position and orientation in the world frame
+  // curr_x, curr_y, curr_yaw = self.get_gem_pose()
+  double curr_x = odom_.pose.pose.position.x;
+  double curr_y = odom_.pose.pose.position.y;
+  double curr_yaw = std::get<2>(euler_angles);
 
+  std::vector<double> dist_vct;
+  dist_vct.reserve(path_vct_.size();)
+  int idx = 0;
 
-// # get current position and orientation in the world frame
-//             curr_x, curr_y, curr_yaw = self.get_gem_pose()
+  // Since we dont know what is the lower distance, we need to find it out.
+  for (const geometry_msgs::PoseStamped& pose_stamped : path_vct_)
+  {
+    pose_stamped.pose.position.x;
+    pose_stamped.pose.position.y;
+    dist_vct[idx] = sqrt(pow(pose_stamped.pose.position.x - curr_x, 2) + pow(pose_stamped.pose.position.y - curr_y, 2));
+    idx++;
+  }
 
-//             self.path_points_x = np.array(self.path_points_x)
-//             self.path_points_y = np.array(self.path_points_y)
+  std::vector<int> goal_vct;
+  for (int i = 0; i < dist_vct.size(); i++)
+  {
+    if (dist_vct[i] >= look_ahead_dist_ - 3.0 && dist_vct[i] <= look_ahead_dist_ + 3.0)
+    {
+      // Store the index of the matching element
+      goal_vct.push_back(i);
+    }
+  }
 
-//             # finding the distance of each way point from the current position
-//             for i in range(len(self.path_points_x)):
-//                 self.dist_arr[i] = self.dist((self.path_points_x[i], self.path_points_y[i]), (curr_x, curr_y))
+  for (int idx : goal_arr)
+  {
+    std::vector<double> v1 = {dist_vct[idx] - curr_x, dist_vct[idx] - curr_y};
+    std::vector<double> v2 = {std::cos(curr_yaw), std::sin(curr_yaw)};
+
+    double temp_angle = find_angle(v1, v2);
+
+    if (std::abs(temp_angle) < M_PI / 2) {
+        goal = idx;
+        break;
+    }
+  }
+
 
 //             # finding those points which are less than the look ahead distance (will be behind and ahead of the vehicle)
 //             goal_arr = np.where( (self.dist_arr < self.look_ahead + 0.3) & (self.dist_arr > self.look_ahead - 0.3) )[0]
@@ -154,6 +164,7 @@ void PurePursuit::run()
   ros::Rate rate(10);
   // readWaypoints();
 
+  ROS_INFO("In run()");
   while (ros::ok())
   {
       // Publish control commands

@@ -8,21 +8,24 @@
 
 PathGenerator:: PathGenerator()
 {
+  // I can create a service server to handle request and publish the path
   ros::NodeHandle nh;
 
+  // Publisher
   path_pub_ = nh.advertise<nav_msgs::Path>("/path", 1);
 }
 
-void PathGenerator::readWaypoints()
+nav_msgs::Path PathGenerator::readWaypoints()
 {
-  std::string filename = ros::package::getPath("path_tracker") + "/files/wps.csv";
-  ROS_INFO("Filename: %s", filename.c_str());
+  std::string filename = ros::package::getPath("path_generator") + "/files/wps.csv";
   std::ifstream file(filename);
+
+  nav_msgs::Path path_msg;
 
   if (!file.is_open())
   {
     std::cerr << "Error: Unable to open waypoints file " << filename << std::endl;
-    return;
+    return path_msg;
   }
 
   std::vector<std::tuple<double, double, double>> path_points;
@@ -31,39 +34,52 @@ void PathGenerator::readWaypoints()
   while (std::getline(file, line))
   {
     std::istringstream ss(line);
-    double x, y, yaw;
-    if (ss >> x >> y >> yaw)
+
+    double x;
+    double y;
+    double yaw;
+    char comma;
+
+    if(ss >> x >> comma >> y >> comma >> yaw)
     {
-      path_points.emplace_back(x, y, yaw);
+      geometry_msgs::PoseStamped waypoint;
+      waypoint.pose.position.x = x;
+      waypoint.pose.position.y = y;
+      waypoint.pose.position.z = yaw;
+      path_msg.poses.push_back(waypoint);
+    }
+    else
+    {
+      std::cout << "Extraction failed!" << std::endl;
     }
   }
+  return path_msg;
+}
 
-  // Message that will carry the Path data
-  nav_msgs::Path path_msg;
 
-  for (const auto& point : path_points)
-  {
-    geometry_msgs::PoseStamped waypoint;
-    waypoint.pose.position.x = std::get<0>(point);
-    waypoint.pose.position.y = std::get<1>(point);
-    waypoint.pose.position.z = std::get<2>(point);
-    path_msg.poses.push_back(waypoint);
-  }
+void PathGenerator::publish()
+{
+  nav_msgs::Path path_msg = readWaypoints();
 
-  // This might change
   path_msg.header.frame_id = "map";
   path_msg.header.stamp = ros::Time::now();
 
+  ROS_INFO("Publishing path into /path topic");
   path_pub_.publish(path_msg);
 }
+
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "path_generator_node");
     PathGenerator path_generator;
+    ros::Rate rate(1);
 
-    // Start the path-tracking node
-    path_generator.readWaypoints();
-
+    while (ros::ok())
+    {
+      path_generator.publish();
+      ros::spinOnce();
+      rate.sleep();
+    }
     return 0;
 }

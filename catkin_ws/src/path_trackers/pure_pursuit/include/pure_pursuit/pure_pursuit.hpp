@@ -14,7 +14,8 @@ public:
     void run();
     void process();
 
-    void readWaypoints();
+private:
+    std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion);
 
 private:
     // Subscribers
@@ -26,12 +27,17 @@ private:
 
     // Member variables
     nav_msgs::Odometry odom_;
+    nav_msgs::Path path_;
+
+    std::vector<geometry_msgs::PoseStamped> path_vct_;
 
     // Waypoints
     std::vector<double> path_points_x_;
     std::vector<double> path_points_y_;
     std::vector<double> path_points_yaw_;
     std::vector<double> dist_arr_;
+
+    double look_ahead_dist_ {6.0};
 };
 
 #endif

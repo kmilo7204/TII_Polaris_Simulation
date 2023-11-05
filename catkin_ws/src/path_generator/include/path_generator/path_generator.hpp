@@ -11,7 +11,8 @@ class PathGenerator
 {
 public:
   PathGenerator();
-  void readWaypoints();
+  nav_msgs::Path readWaypoints();
+  void publish();
 
 private:
     ros::Publisher path_pub_;
