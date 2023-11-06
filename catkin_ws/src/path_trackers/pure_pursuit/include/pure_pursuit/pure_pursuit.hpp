@@ -39,7 +39,7 @@ private:
     std::vector<double> dist_arr_;
 
     // double look_ahead_dist_ {6.0};
-    double look_ahead_dist_ {10.0};
+    double look_ahead_dist_ {6.0};
 
 };
 

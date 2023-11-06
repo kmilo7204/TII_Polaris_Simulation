@@ -110,13 +110,13 @@ void PurePursuit::process()
   std::vector<int> goal_vct;
   for (int i = 0; i < dist_vct.size(); i++)
   {
-    ROS_INFO("Distance-i: %f", dist_vct[i]);
-    ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
-    ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
+    // ROS_INFO("Distance-i: %f", dist_vct[i]);
+    // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
+    // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
 
-    if (dist_vct[i] >= look_ahead_dist_ - 3.0 && dist_vct[i] <= look_ahead_dist_ + 3.0)
+    if (dist_vct[i] >= look_ahead_dist_ - 2.0 && dist_vct[i] <= look_ahead_dist_ + 2.0)
     {
-      ROS_INFO("TRUE");
+      // ROS_INFO("TRUE");
 
       // Store the index of the matching element
       goal_vct.push_back(i);
