@@ -28,15 +28,22 @@ PurePursuit::PurePursuit()
 
 std::tuple<double, double, double> PurePursuit::quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
 {
+    double qx = quaternion.x;
+    double qy = quaternion.y;
+    double qz = quaternion.z;
+    double qw = quaternion.w;
+
+    // ROS_INFO("QX: %f, QY: %f, QZ: %f, QW: %f", qx, qy, qz, qw);
+
     tf2::Quaternion tf_quaternion;
     tf2::fromMsg(quaternion, tf_quaternion);
     double roll;
     double pitch;
     double yaw;
     tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
-    ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
+    // ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
 
-    std::tuple<double, double, double> { roll, pitch, yaw };
+    return std::make_tuple(roll, pitch, yaw);
 }
 
 void PurePursuit::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
@@ -49,19 +56,19 @@ void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
   ROS_INFO("Receiving information in path message");
   // path_ = *path_msg;
   path_vct_ = path_msg->poses;
+
   for (geometry_msgs::PoseStamped pose_stp : path_vct_)
   {
     double x = pose_stp.pose.position.x;
     double y = pose_stp.pose.position.y;
 
-    // double x = pose_stp.pose.orientation.x;
-    // double y = pose_stp.pose.orientation.y;
-    // double z = pose_stp.pose.orientation.z;
-    // double w = pose_stp.pose.orientation.w;
+    double qx = pose_stp.pose.orientation.x;
+    double qy = pose_stp.pose.orientation.y;
+    double qz = pose_stp.pose.orientation.z;
+    double qw = pose_stp.pose.orientation.w;
 
-    ROS_INFO("X: %f, Y: %f", x, y);
-  // ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
-
+    // ROS_INFO("X: %f, Y: %f", x, y);
+    // ROS_INFO("RXQ: %f, RYQ: %f, RZQ: %f, RWQ: %f", qx, qy, qz, qw);
   }
 }
 
@@ -82,10 +89,9 @@ void PurePursuit::process()
   double curr_x = odom_.pose.pose.position.x;
   double curr_y = odom_.pose.pose.position.y;
   double curr_yaw = std::get<2>(euler_angles);
-  ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
 
   std::vector<double> dist_vct;
-  ROS_INFO("Path size: %d", path_vct_.size());
+  // ROS_INFO("Path size: %d", path_vct_.size());
   dist_vct.reserve(path_vct_.size());
 
   // ROS_INFO("Dist size: %d", dist_vct.size());
@@ -99,24 +105,25 @@ void PurePursuit::process()
     idx++;
   }
 
+  // I need to tune waypoints or disntances, because I have a lot of dinstances between the elements.
   // ROS_INFO("Distance found: %f", dist_vct[idx]);
   std::vector<int> goal_vct;
   for (int i = 0; i < dist_vct.size(); i++)
   {
-    // ROS_INFO("Distance-i: %f", dist_vct[i]);
-    // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
-    // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
+    ROS_INFO("Distance-i: %f", dist_vct[i]);
+    ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
+    ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
 
     if (dist_vct[i] >= look_ahead_dist_ - 3.0 && dist_vct[i] <= look_ahead_dist_ + 3.0)
     {
-      // ROS_INFO("TRUE");
+      ROS_INFO("TRUE");
 
       // Store the index of the matching element
       goal_vct.push_back(i);
     }
   }
 
-  // ROS_INFO("Goals processed: %d", goal_vct.size());
+  ROS_INFO("Goals processed: %d", goal_vct.size());
 
   int goal = -1;
   for (int idx : goal_vct)
@@ -143,7 +150,9 @@ void PurePursuit::process()
 
     double l = dist_vct[goal];
     geometry_msgs::PoseStamped target_pose = path_vct_[goal];
+    ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
     ROS_INFO("GX: %f, GY: %f", target_pose.pose.position.x, target_pose.pose.position.y);
+    ROS_INFO("GXQ: %f, GYQ: %f, GZQ: %f, GWQ: %f", target_pose.pose.orientation.x, target_pose.pose.orientation.y, target_pose.pose.orientation.z, target_pose.pose.orientation.w);
 
     double xc = target_pose.pose.position.x - curr_x;
     double yc = target_pose.pose.position.y - curr_y;
@@ -168,9 +177,9 @@ void PurePursuit::process()
 
     ROS_INFO("CTE: %f", ct_error);
 
-    // // Publish control commands
-    // ackermann_cmd.speed = 1.5;
-    // ackermann_cmd.steering_angle = angle;
+    // Publish control commands
+    ackermann_cmd.speed = 1.5;
+    ackermann_cmd.steering_angle = angle;
   }
   ROS_INFO("Publishing velocity");
   // Set control_command values as needed
@@ -180,20 +189,11 @@ void PurePursuit::process()
 
 void PurePursuit::run()
 {
-  ros::Rate rate(10);
+  ros::Rate rate(1);
 
   ROS_INFO("In run()");
   while (ros::ok())
   {
-    // Publish control commands
-    // ackermann_msgs::AckermannDrive ackermann_cmd;
-    // This is working
-    // ackermann_cmd.speed = 0.0;
-    // ROS_INFO("Publishing velocity");
-    // Set control_command values as needed
-    // ackermann_pub_.publish(ackermann_cmd);
-
-    // Lets do some test
     if (path_vct_.size() > 0)
     {
       process();

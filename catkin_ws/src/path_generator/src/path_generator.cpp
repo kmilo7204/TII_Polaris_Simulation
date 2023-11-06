@@ -50,7 +50,6 @@ nav_msgs::Path PathGenerator::readWaypoints()
       waypoint.pose.position.x = x;
       waypoint.pose.position.y = y;
       // waypoint.pose.position.z = yaw;
-      path_msg.poses.push_back(waypoint);
 
       tf2::Quaternion q;
       q.setRPY(0.0, 0.0, yaw);
@@ -58,8 +57,9 @@ nav_msgs::Path PathGenerator::readWaypoints()
       waypoint.pose.orientation.y = q.y();
       waypoint.pose.orientation.z = q.z();
       waypoint.pose.orientation.w = q.w();
-      // ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
 
+      path_msg.poses.push_back(waypoint);
+      ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
     }
     else
     {
@@ -72,15 +72,14 @@ nav_msgs::Path PathGenerator::readWaypoints()
 
 void PathGenerator::publish()
 {
-  nav_msgs::Path path_msg = readWaypoints();
-
-  path_msg.header.frame_id = "map";
-  path_msg.header.stamp = ros::Time::now();
-
-  ROS_INFO("Publishing path into /path topic");
-
   if (pub_ctr < 2)
   {
+    nav_msgs::Path path_msg = readWaypoints();
+
+    path_msg.header.frame_id = "map";
+    path_msg.header.stamp = ros::Time::now();
+
+    ROS_INFO("Publishing path into /path topic");
     path_pub_.publish(path_msg);
     pub_ctr++;
   }
