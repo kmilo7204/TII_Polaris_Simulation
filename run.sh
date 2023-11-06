@@ -1,12 +1,11 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 <project_folder> <docker_image>"
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <project_folder>"
     exit 1
 fi
 
 PROJECT_FOLDER=$1
-DOCKER_IMAGE=$2
 
 # Additional Docker options
 DOCKER_OPTIONS="--privileged \

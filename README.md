@@ -6,7 +6,7 @@ docker build -t ros-gazebo-nvidia-tii:20.04 .
 
 - Run
 
-    ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src ros-gazebo-nvidia-tii:20.04
+    ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src
 
 
 roslaunch gem_gazebo gem_gazebo_rviz.launch velodyne_points:="true"

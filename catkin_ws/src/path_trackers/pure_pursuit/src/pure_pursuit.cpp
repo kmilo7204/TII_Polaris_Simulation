@@ -108,17 +108,19 @@ void PurePursuit::process()
   // I need to tune waypoints or disntances, because I have a lot of dinstances between the elements.
   // ROS_INFO("Distance found: %f", dist_vct[idx]);
   std::vector<int> goal_vct;
+  //I can sort the dist_vct. Will be cheap since it does not contiains a lot of elements
+  // This wont work, because I would lost the index order
   for (int i = 0; i < dist_vct.size(); i++)
   {
-    // ROS_INFO("Distance-i: %f", dist_vct[i]);
-    // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
-    // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
-
     if (dist_vct[i] >= look_ahead_dist_ - 2.0 && dist_vct[i] <= look_ahead_dist_ + 2.0)
     {
+      // ROS_INFO("Distance: %f, Idx: %ld", dist_vct[i], i);
+      // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
+      // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
       // ROS_INFO("TRUE");
 
       // Store the index of the matching element
+      ROS_INFO("Index to be processed: %ld", i);
       goal_vct.push_back(i);
     }
   }
@@ -128,15 +130,37 @@ void PurePursuit::process()
   int goal = -1;
   for (int idx : goal_vct)
   {
-    std::vector<double> v1 = {dist_vct[idx] - curr_x, dist_vct[idx] - curr_y};
+    geometry_msgs::PoseStamped goal_pose = path_vct_[idx];
+    double x_goal = goal_pose.pose.position.x;
+    double y_goal = goal_pose.pose.position.y;
+
+    // std::vector<double> v1 = {dist_vct[idx] - curr_x, dist_vct[idx] - curr_y};
+    std::vector<double> v1 = {x_goal - curr_x, y_goal - curr_y};
+    // v1 = [self.path_points_x[idx]-curr_x , self.path_points_y[idx]-curr_y]
+
+    ROS_INFO("V1_x: %f, V1_y: %f", x_goal - curr_x, y_goal - curr_y);
+    // ROS_INFO("V1_x: %f, V1_y: %f", goal_vct[idx] - curr_x, goal_vct[idx] - curr_y);
+
     std::vector<double> v2 = {std::cos(curr_yaw), std::sin(curr_yaw)};
 
     double temp_angle = find_angle(v1, v2);
+    ROS_INFO("Temp angle: %f",temp_angle);
 
-    if (std::abs(temp_angle) < M_PI / 2)
+    if (std::abs(temp_angle) < ((M_PI / 2) + 0.5))
     {
-      goal = idx;
-      break;
+      ROS_INFO("Previous index: %d", prev_idx_);
+      if (prev_idx_ == 0)
+      {
+        goal = idx;
+        prev_idx_ = idx;
+      }
+
+      if (idx >= prev_idx_)
+      {
+        goal = idx;
+        prev_idx_ = idx;
+        break;
+      }
     }
   }
 
@@ -151,8 +175,8 @@ void PurePursuit::process()
     double l = dist_vct[goal];
     geometry_msgs::PoseStamped target_pose = path_vct_[goal];
     ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
-    ROS_INFO("GX: %f, GY: %f", target_pose.pose.position.x, target_pose.pose.position.y);
-    ROS_INFO("GXQ: %f, GYQ: %f, GZQ: %f, GWQ: %f", target_pose.pose.orientation.x, target_pose.pose.orientation.y, target_pose.pose.orientation.z, target_pose.pose.orientation.w);
+    // ROS_INFO("goal_x: %f, goal_y: %f", target_pose.pose.position.x, target_pose.pose.position.y);
+    // ROS_INFO("GXQ: %f, GYQ: %f, GZQ: %f, GWQ: %f", target_pose.pose.orientation.x, target_pose.pose.orientation.y, target_pose.pose.orientation.z, target_pose.pose.orientation.w);
 
     double xc = target_pose.pose.position.x - curr_x;
     double yc = target_pose.pose.position.y - curr_y;
@@ -161,7 +185,8 @@ void PurePursuit::process()
     std::tuple<double, double, double> goal_angles = quaternionToEulerAngles(target_pose.pose.orientation);
 
     double goal_yaw = std::get<2>(goal_angles);
-    ROS_INFO("Goal yaw: %f", goal_yaw);
+    // ROS_INFO("Goal yaw: %f", goal_yaw);
+    ROS_INFO("goal_x: %f, goal_y: %f, goal_yaw: %f", target_pose.pose.position.x, target_pose.pose.position.y, goal_yaw);
 
     double alpha = goal_yaw - curr_yaw;
     ROS_INFO("Alpha: %f", alpha);
@@ -169,6 +194,7 @@ void PurePursuit::process()
     double k = 0.285;
     double wheelbase = 1.75;
     double angle_i = std::atan((2 * k * wheelbase * std::sin(alpha)) / l);
+
     ROS_INFO("Angle i: %f", angle_i);
 
     double angle = angle_i * 2;

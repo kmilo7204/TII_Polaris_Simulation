@@ -40,6 +40,7 @@ private:
 
     // double look_ahead_dist_ {6.0};
     double look_ahead_dist_ {6.0};
+    int prev_idx_ {0};
 
 };
 

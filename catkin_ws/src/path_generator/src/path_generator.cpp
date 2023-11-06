@@ -21,7 +21,7 @@ PathGenerator:: PathGenerator()
 
 nav_msgs::Path PathGenerator::readWaypoints()
 {
-  std::string filename = ros::package::getPath("path_generator") + "/files/wps_modified.csv";
+  std::string filename = ros::package::getPath("path_generator") + "/files/others.csv";
   std::ifstream file(filename);
 
   nav_msgs::Path path_msg;
@@ -76,7 +76,7 @@ void PathGenerator::publish()
   {
     nav_msgs::Path path_msg = readWaypoints();
 
-    path_msg.header.frame_id = "map";
+    path_msg.header.frame_id = "base_footprint";
     path_msg.header.stamp = ros::Time::now();
 
     ROS_INFO("Publishing path into /path topic");
