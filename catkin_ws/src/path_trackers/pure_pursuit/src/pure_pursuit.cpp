@@ -34,7 +34,7 @@ std::tuple<double, double, double> PurePursuit::quaternionToEulerAngles(const ge
     double pitch;
     double yaw;
     tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
-    // ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
+    ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
 
     std::tuple<double, double, double> { roll, pitch, yaw };
 }
@@ -54,7 +54,14 @@ void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
     double x = pose_stp.pose.position.x;
     double y = pose_stp.pose.position.y;
 
+    // double x = pose_stp.pose.orientation.x;
+    // double y = pose_stp.pose.orientation.y;
+    // double z = pose_stp.pose.orientation.z;
+    // double w = pose_stp.pose.orientation.w;
+
     ROS_INFO("X: %f, Y: %f", x, y);
+  // ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
+
   }
 }
 
@@ -70,7 +77,6 @@ double PurePursuit::find_angle(const std::vector<double>& v1, const std::vector<
 
 void PurePursuit::process()
 {
-  // ROS_INFO("Process init");
   std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
 
   double curr_x = odom_.pose.pose.position.x;
@@ -110,8 +116,7 @@ void PurePursuit::process()
     }
   }
 
-  ROS_INFO("Goals processed: %d", goal_vct.size());
-
+  // ROS_INFO("Goals processed: %d", goal_vct.size());
 
   int goal = -1;
   for (int idx : goal_vct)
@@ -138,11 +143,10 @@ void PurePursuit::process()
 
     double l = dist_vct[goal];
     geometry_msgs::PoseStamped target_pose = path_vct_[goal];
+    ROS_INFO("GX: %f, GY: %f", target_pose.pose.position.x, target_pose.pose.position.y);
+
     double xc = target_pose.pose.position.x - curr_x;
     double yc = target_pose.pose.position.y - curr_y;
-
-    // double goal_x_veh_coord = (xc * std::cos(curr_yaw)) + (yc * std::sin(curr_yaw));
-    // double goal_y_veh_coord = (yc * std::cos(curr_yaw)) - (xc * std::sin(curr_yaw));
 
     // Find the curvature
     std::tuple<double, double, double> goal_angles = quaternionToEulerAngles(target_pose.pose.orientation);
@@ -164,9 +168,9 @@ void PurePursuit::process()
 
     ROS_INFO("CTE: %f", ct_error);
 
-    // Publish control commands
-    ackermann_cmd.speed = 1.5;
-    ackermann_cmd.steering_angle = angle;
+    // // Publish control commands
+    // ackermann_cmd.speed = 1.5;
+    // ackermann_cmd.steering_angle = angle;
   }
   ROS_INFO("Publishing velocity");
   // Set control_command values as needed

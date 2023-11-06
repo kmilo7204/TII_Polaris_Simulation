@@ -6,6 +6,9 @@
 #include <sstream>
 
 
+#include <geometry_msgs/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 PathGenerator:: PathGenerator()
 {
   // I can create a service server to handle request and publish the path
@@ -46,8 +49,17 @@ nav_msgs::Path PathGenerator::readWaypoints()
       geometry_msgs::PoseStamped waypoint;
       waypoint.pose.position.x = x;
       waypoint.pose.position.y = y;
-      waypoint.pose.position.z = yaw;
+      // waypoint.pose.position.z = yaw;
       path_msg.poses.push_back(waypoint);
+
+      tf2::Quaternion q;
+      q.setRPY(0.0, 0.0, yaw);
+      waypoint.pose.orientation.x = q.x();
+      waypoint.pose.orientation.y = q.y();
+      waypoint.pose.orientation.z = q.z();
+      waypoint.pose.orientation.w = q.w();
+      // ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
+
     }
     else
     {
