@@ -1,26 +1,19 @@
 #include <pure_pursuit/pure_pursuit.hpp>
 
+#include <cmath>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <vector>
-#include <iostream>
-#include <ros/package.h>
 
-#include <cmath>
-
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Matrix3x3.h>
-#include <geometry_msgs/Quaternion.h>
 
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-#include "path_trackers/utils/math_utils.hpp"
-// #include "utils/math_utils.hpp"
 
 PurePursuit::PurePursuit()
 {
-  // Initialize ROS node
   ros::NodeHandle nh;
 
   odom_subscriber_ = nh.subscribe("/gem/base_footprint/odom", 1, &PurePursuit::odomCallback, this);
@@ -57,21 +50,20 @@ void PurePursuit::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
   ROS_INFO("Receiving information in path message");
-  // path_ = *path_msg;
   path_vct_ = path_msg->poses;
 
-  for (geometry_msgs::PoseStamped pose_stp : path_vct_)
-  {
-    double x = pose_stp.pose.position.x;
-    double y = pose_stp.pose.position.y;
+  // for (geometry_msgs::PoseStamped pose_stp : path_vct_)
+  // {
+  //   double x = pose_stp.pose.position.x;
+  //   double y = pose_stp.pose.position.y;
 
-    double qx = pose_stp.pose.orientation.x;
-    double qy = pose_stp.pose.orientation.y;
-    double qz = pose_stp.pose.orientation.z;
-    double qw = pose_stp.pose.orientation.w;
-
-  }
+  //   double qx = pose_stp.pose.orientation.x;
+  //   double qy = pose_stp.pose.orientation.y;
+  //   double qz = pose_stp.pose.orientation.z;
+  //   double qw = pose_stp.pose.orientation.w;
+  // }
 }
+
 
 double PurePursuit::find_angle(const std::vector<double>& v1, const std::vector<double>& v2)
 {
@@ -200,10 +192,10 @@ void PurePursuit::process()
     ROS_INFO("CTE: %f", ct_error);
 
     // Publish control commands
-    ackermann_cmd.speed = 1.5;
+    ackermann_cmd.speed = 2.8;
     ackermann_cmd.steering_angle = angle;
   }
-  ROS_INFO("Publishing velocity");
+  // ROS_INFO("Publishing velocity");
   // Set control_command values as needed
   ackermann_pub_.publish(ackermann_cmd);
 }
