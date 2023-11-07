@@ -15,6 +15,9 @@
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
+#include "path_trackers/utils/math_utils.hpp"
+// #include "utils/math_utils.hpp"
+
 PurePursuit::PurePursuit()
 {
   // Initialize ROS node
@@ -67,8 +70,6 @@ void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
     double qz = pose_stp.pose.orientation.z;
     double qw = pose_stp.pose.orientation.w;
 
-    // ROS_INFO("X: %f, Y: %f", x, y);
-    // ROS_INFO("RXQ: %f, RYQ: %f, RZQ: %f, RWQ: %f", qx, qy, qz, qw);
   }
 }
 
@@ -118,7 +119,6 @@ void PurePursuit::process()
       // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
       // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
       // ROS_INFO("TRUE");
-
       // Store the index of the matching element
       ROS_INFO("Index to be processed: %ld", i);
       goal_vct.push_back(i);
@@ -134,14 +134,9 @@ void PurePursuit::process()
     double x_goal = goal_pose.pose.position.x;
     double y_goal = goal_pose.pose.position.y;
 
-    // std::vector<double> v1 = {dist_vct[idx] - curr_x, dist_vct[idx] - curr_y};
     std::vector<double> v1 = {x_goal - curr_x, y_goal - curr_y};
-    // v1 = [self.path_points_x[idx]-curr_x , self.path_points_y[idx]-curr_y]
-
-    ROS_INFO("V1_x: %f, V1_y: %f", x_goal - curr_x, y_goal - curr_y);
-    // ROS_INFO("V1_x: %f, V1_y: %f", goal_vct[idx] - curr_x, goal_vct[idx] - curr_y);
-
     std::vector<double> v2 = {std::cos(curr_yaw), std::sin(curr_yaw)};
+    ROS_INFO("V1_x: %f, V1_y: %f", x_goal - curr_x, y_goal - curr_y);
 
     double temp_angle = find_angle(v1, v2);
     ROS_INFO("Temp angle: %f",temp_angle);
@@ -191,7 +186,8 @@ void PurePursuit::process()
     double alpha = goal_yaw - curr_yaw;
     ROS_INFO("Alpha: %f", alpha);
 
-    double k = 0.285;
+    // double k = 0.285;
+    double k = 0.5;
     double wheelbase = 1.75;
     double angle_i = std::atan((2 * k * wheelbase * std::sin(alpha)) / l);
 

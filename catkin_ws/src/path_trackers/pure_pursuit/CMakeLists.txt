@@ -18,6 +18,11 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../path_trackers/utils)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../path_trackers/utils)
+
+
+# include_directories(${CATKIN_DEVEL_PREFIX}/path_trackers/utils)
 
 add_executable(pure_pursuit src/pure_pursuit.cpp)
 target_link_libraries(pure_pursuit ${catkin_LIBRARIES})
