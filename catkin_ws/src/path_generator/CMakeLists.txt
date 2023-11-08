@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   roslib
   nav_msgs
+  std_srvs
 )
 
 catkin_package()

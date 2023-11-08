@@ -87,20 +87,11 @@ void PurePursuit::process()
     idx++;
   }
 
-  // I need to tune waypoints or disntances, because I have a lot of dinstances between the elements.
-  // ROS_INFO("Distance found: %f", dist_vct[idx]);
   std::vector<int> goal_vct;
-  //I can sort the dist_vct. Will be cheap since it does not contiains a lot of elements
-  // This wont work, because I would lost the index order
   for (int i = 0; i < dist_vct.size(); i++)
   {
     if (dist_vct[i] >= look_ahead_dist_ - 2.0 && dist_vct[i] <= look_ahead_dist_ + 2.0)
     {
-      // ROS_INFO("Distance: %f, Idx: %ld", dist_vct[i], i);
-      // ROS_INFO("Minor: %f", look_ahead_dist_ - 3.0);
-      // ROS_INFO("Major: %f", look_ahead_dist_ + 3.0);
-      // ROS_INFO("TRUE");
-      // Store the index of the matching element
       ROS_INFO("Index to be processed: %ld", i);
       goal_vct.push_back(i);
     }
@@ -152,8 +143,8 @@ void PurePursuit::process()
     geometry_msgs::PoseStamped target_pose = path_vct_[goal];
     ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
 
-    double xc = target_pose.pose.position.x - curr_x;
-    double yc = target_pose.pose.position.y - curr_y;
+    // double xc = target_pose.pose.position.x - curr_x;
+    // double yc = target_pose.pose.position.y - curr_y;
 
     // Find the curvature
     std::tuple<double, double, double> goal_angles = quaternionToEulerAngles(target_pose.pose.orientation);

@@ -9,32 +9,51 @@
 #include <geometry_msgs/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-PathGenerator:: PathGenerator()
+PathGenerator::PathGenerator()
 {
-  // I can create a service server to handle request and publish the path
+  // Create the nodehandler
   ros::NodeHandle nh;
 
   // Publisher
   path_pub_ = nh.advertise<nav_msgs::Path>("/path", 1);
+
+  // Service server
+  path_req_srv_ = nh.advertiseService("/generate_path", &PathGenerator::readAndPublishPathSvcCallback, this);
+}
+
+bool PathGenerator::readAndPublishPathSvcCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
+{
+  ROS_INFO("Path creation request received");
+  if (readWaypointsFromCSV("others.csv"))
+  {
+    // Publish the path
+    publishPath();
+    res.success = true;
+    return true;
+  }
+  res.success = false;
+  return true;
 }
 
 
-nav_msgs::Path PathGenerator::readWaypoints()
+bool PathGenerator::readWaypointsFromCSV(std::string csv_filename)
 {
-  std::string filename = ros::package::getPath("path_generator") + "/files/others.csv";
-  std::ifstream file(filename);
+  // Look at CSV files under the files folder
+  std::string filename = ros::package::getPath("path_generator") + "/files/" + csv_filename;
+  ROS_INFO("CSV path file found at: %s", filename);
 
-  nav_msgs::Path path_msg;
+  std::ifstream file(filename);
 
   if (!file.is_open())
   {
     std::cerr << "Error: Unable to open waypoints file " << filename << std::endl;
-    return path_msg;
+    return false;
   }
 
   std::vector<std::tuple<double, double, double>> path_points;
   std::string line;
 
+  ROS_INFO("Creating path message...");
   while (std::getline(file, line))
   {
     std::istringstream ss(line);
@@ -49,7 +68,6 @@ nav_msgs::Path PathGenerator::readWaypoints()
       geometry_msgs::PoseStamped waypoint;
       waypoint.pose.position.x = x;
       waypoint.pose.position.y = y;
-      // waypoint.pose.position.z = yaw;
 
       tf2::Quaternion q;
       q.setRPY(0.0, 0.0, yaw);
@@ -58,7 +76,7 @@ nav_msgs::Path PathGenerator::readWaypoints()
       waypoint.pose.orientation.z = q.z();
       waypoint.pose.orientation.w = q.w();
 
-      path_msg.poses.push_back(waypoint);
+      path_.poses.push_back(waypoint);
       ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
     }
     else
@@ -66,23 +84,17 @@ nav_msgs::Path PathGenerator::readWaypoints()
       std::cout << "Extraction failed!" << std::endl;
     }
   }
-  return path_msg;
+  return true;
 }
 
 
-void PathGenerator::publish()
+void PathGenerator::publishPath()
 {
-  if (pub_ctr < 2)
-  {
-    nav_msgs::Path path_msg = readWaypoints();
-
-    path_msg.header.frame_id = "base_footprint";
-    path_msg.header.stamp = ros::Time::now();
+    path_.header.frame_id = "base_footprint";
+    path_.header.stamp = ros::Time::now();
 
     ROS_INFO("Publishing path into /path topic");
-    path_pub_.publish(path_msg);
-    pub_ctr++;
-  }
+    path_pub_.publish(path_);
 }
 
 
@@ -94,7 +106,6 @@ int main(int argc, char** argv)
 
   while (ros::ok())
   {
-    path_generator.publish();
     ros::spinOnce();
     rate.sleep();
   }
