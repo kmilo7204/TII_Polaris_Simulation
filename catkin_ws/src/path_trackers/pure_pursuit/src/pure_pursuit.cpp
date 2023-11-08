@@ -51,17 +51,6 @@ void PurePursuit::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
   ROS_INFO("Receiving information in path message");
   path_vct_ = path_msg->poses;
-
-  // for (geometry_msgs::PoseStamped pose_stp : path_vct_)
-  // {
-  //   double x = pose_stp.pose.position.x;
-  //   double y = pose_stp.pose.position.y;
-
-  //   double qx = pose_stp.pose.orientation.x;
-  //   double qy = pose_stp.pose.orientation.y;
-  //   double qz = pose_stp.pose.orientation.z;
-  //   double qw = pose_stp.pose.orientation.w;
-  // }
 }
 
 
@@ -162,8 +151,6 @@ void PurePursuit::process()
     double l = dist_vct[goal];
     geometry_msgs::PoseStamped target_pose = path_vct_[goal];
     ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
-    // ROS_INFO("goal_x: %f, goal_y: %f", target_pose.pose.position.x, target_pose.pose.position.y);
-    // ROS_INFO("GXQ: %f, GYQ: %f, GZQ: %f, GWQ: %f", target_pose.pose.orientation.x, target_pose.pose.orientation.y, target_pose.pose.orientation.z, target_pose.pose.orientation.w);
 
     double xc = target_pose.pose.position.x - curr_x;
     double yc = target_pose.pose.position.y - curr_y;

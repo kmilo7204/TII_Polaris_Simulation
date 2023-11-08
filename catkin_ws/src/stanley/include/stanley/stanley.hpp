@@ -16,14 +16,17 @@ public:
     void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg);
     void pathCallback(const nav_msgs::Path::ConstPtr& path_msg);
     void run();
-    void process();
     void process_1();
-
-    double pi_2_pi(double angle);
 
 std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion);
 
 private:
+    // Member methods
+    void follow_trajectory();
+    void follow_trajectory_1();
+
+    double pi_2_pi(double angle);
+
     // Subscribers
     ros::Subscriber odom_subscriber_;
     ros::Subscriber gps_subscriber_;
@@ -33,21 +36,17 @@ private:
 
     // Member variables
     nav_msgs::Odometry odom_;
-
+    nav_msgs::Path path_;
     std::vector<geometry_msgs::PoseStamped> path_vct_;
 
     double wheelbase_{ 1.75 };
 
-    // Control constants
-    // const double Kp = 1.0; // Proportional control gain
-    // const double Kd = 2.0; // Derivative control gain
-    // const double Ks = 1.0; // Speed control gain
-
-    const double Kp = 0.01; // Proportional control gain
-    const double Kd = 0.3; // Derivative control gain
-    const double Ks = 0.05; // Speed control gain
+    const double Kp { 0.01 }; // Proportional control gain
+    const double Kd { 0.3 }; // Derivative control gain
+    const double Ks { 0.05 }; // Speed control gain
 
     int prev_idx {0};
+
 
 };
 
