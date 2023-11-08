@@ -17,6 +17,7 @@ public:
     void pathCallback(const nav_msgs::Path::ConstPtr& path_msg);
     void run();
     void process();
+    void process_1();
 
     double pi_2_pi(double angle);
 
@@ -36,6 +37,18 @@ private:
     std::vector<geometry_msgs::PoseStamped> path_vct_;
 
     double wheelbase_{ 1.75 };
+
+    // Control constants
+    // const double Kp = 1.0; // Proportional control gain
+    // const double Kd = 2.0; // Derivative control gain
+    // const double Ks = 1.0; // Speed control gain
+
+    const double Kp = 0.01; // Proportional control gain
+    const double Kd = 0.3; // Derivative control gain
+    const double Ks = 0.05; // Speed control gain
+
+    int prev_idx {0};
+
 };
 
 #endif
