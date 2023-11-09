@@ -43,14 +43,17 @@ std::tuple<double, double, double> PurePursuitTracker::quaternionToEulerAngles(c
     return std::make_tuple(roll, pitch, yaw);
 }
 
+
 void PurePursuitTracker::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 {
-  odom_.pose = odom_msg->pose;
+  odom_ = *odom_msg;
 }
+
 
 void PurePursuitTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
   ROS_INFO("Receiving information in path message");
+  path_ = *path_msg;
   path_vct_ = path_msg->poses;
 }
 
@@ -154,10 +157,7 @@ void PurePursuitTracker::followPath()
     double alpha = goal_yaw - curr_yaw;
     ROS_INFO("Alpha: %f", alpha);
 
-    // double k = 0.285;
-    double k = 0.5;
-    double wheelbase = 1.75;
-    double angle_i = std::atan((2 * k * wheelbase * std::sin(alpha)) / l);
+    double angle_i = std::atan((2 * k_ * wheelbase_ * std::sin(alpha)) / l);
 
     ROS_INFO("Angle i: %f", angle_i);
 
@@ -171,24 +171,22 @@ void PurePursuitTracker::followPath()
     ackermann_cmd.speed = 2.8;
     ackermann_cmd.steering_angle = angle;
   }
-  // ROS_INFO("Publishing velocity");
   // Set control_command values as needed
   ackermann_pub_.publish(ackermann_cmd);
 }
 
-// void PurePursuitTracker::run()
-// {
-//   ros::Rate rate(1);
+void PurePursuitTracker::stop()
+{
+  path_vct_.clear();
 
-//   ROS_INFO("In run()");
-//   while (ros::ok())
-//   {
-//     if (path_vct_.size() > 0)
-//     {
-//       followPath();
-//     }
+  // Send stop command
+  ackermann_msgs::AckermannDrive ackermann_cmd;
+  ackermann_cmd.speed = 0.0;
+  ackermann_cmd.steering_angle = 0.0;
+  ackermann_pub_.publish(ackermann_cmd);
+}
 
-//     ros::spinOnce();
-//     rate.sleep();
-//   }
-// }
+bool PurePursuitTracker::hasPath()
+{
+  return path_vct_.size() > 2;
+}

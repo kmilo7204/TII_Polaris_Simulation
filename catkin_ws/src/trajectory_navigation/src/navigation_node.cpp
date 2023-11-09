@@ -9,7 +9,24 @@ int main(int argc, char** argv) {
 
     NavigationStateMachine state_machine;
 
-    // Your ROS node logic goes here
+    ros::Rate rate(1);
+
+    ROS_INFO("Launch Navigation State Machine");
+    while (ros::ok())
+    {
+        // if (path_.poses.size() > 0)
+        // {
+        //     follow_trajectory_1();
+        // }
+        // Start FSM
+        // In the Start method I instante the object
+        // Once instantiated, it passes to Idle state
+        // If Idle state, checks the path size. If 0, continues in Idle
+        // If path, transition Following state and call the follow path method
+        // 
+        ros::spinOnce();
+        rate.sleep();
+    }
 
     // Example transitions
     state_machine.transitionToFollowPath();

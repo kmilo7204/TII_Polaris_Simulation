@@ -21,10 +21,12 @@ StanleyTracker::StanleyTracker()
   ackermann_pub_ = nh.advertise<ackermann_msgs::AckermannDrive>("/gem/ackermann_cmd", 1);
 }
 
+
 void StanleyTracker::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 {
   odom_ = *odom_msg;
 }
+
 
 void StanleyTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
@@ -32,6 +34,7 @@ void StanleyTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
   path_vct_ = path_msg->poses;
   path_ = *path_msg;
 }
+
 
 void StanleyTracker::run()
 {
@@ -50,6 +53,7 @@ void StanleyTracker::run()
   }
 }
 
+
 std::tuple<double, double, double> StanleyTracker::quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
 {
     double qx = quaternion.x;
@@ -67,6 +71,7 @@ std::tuple<double, double, double> StanleyTracker::quaternionToEulerAngles(const
     return std::make_tuple(roll, pitch, yaw);
 }
 
+
 double StanleyTracker::pi_2_pi(double angle)
 {
   if (angle > M_PI)
@@ -80,6 +85,7 @@ double StanleyTracker::pi_2_pi(double angle)
 
   return angle;
 }
+
 
 void StanleyTracker::process_1()
 {
@@ -144,6 +150,7 @@ void StanleyTracker::process_1()
 
   ackermann_pub_.publish(ackermann_cmd);
 }
+
 
 void StanleyTracker::follow_trajectory_1()
 {

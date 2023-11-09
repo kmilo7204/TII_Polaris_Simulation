@@ -17,7 +17,8 @@ public:
     void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
     void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
     void followPath() override;
-    // void run();
+    void stop() override;
+    bool hasPath() override;
 
 private:
     std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion);
@@ -33,6 +34,7 @@ private:
 
     // Member variables
     nav_msgs::Odometry odom_;
+    nav_msgs::Path path_;
 
     std::vector<geometry_msgs::PoseStamped> path_vct_;
 
@@ -42,9 +44,11 @@ private:
     std::vector<double> path_points_yaw_;
     std::vector<double> dist_arr_;
 
+    const double wheelbase_{ 1.75 };
+    const double k_ { 0.5 }; // 0.285
+
     double look_ahead_dist_ {6.0};
     int prev_idx_ {0};
-
 };
 
 #endif

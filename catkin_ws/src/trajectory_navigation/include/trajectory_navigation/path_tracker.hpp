@@ -15,6 +15,8 @@ public:
     // virtual void followPath(const geometry_msgs::PoseStamped& path) = 0;
     virtual void followPath() = 0;
     virtual void stop() = 0;
+    virtual bool hasPath() = 0;
+
     virtual ~PathTracker() {}
 };
 

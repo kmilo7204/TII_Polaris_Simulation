@@ -39,6 +39,7 @@ add_library(navigation_state_machine
 
 target_link_libraries(navigation_state_machine
   ${catkin_LIBRARIES}
+  pure_pursuit_tracker
 )
 
 add_dependencies(navigation_state_machine
@@ -53,6 +54,7 @@ add_executable(navigation_node
 
 target_link_libraries(navigation_node
   navigation_state_machine
+  pure_pursuit_tracker
   ${catkin_LIBRARIES}
   utils
 )
@@ -69,6 +71,7 @@ add_library(stanley_tracker
 
 target_link_libraries(stanley_tracker
   ${catkin_LIBRARIES}
+  pure_pursuit_tracker
 )
 
 add_dependencies(navigation_state_machine
