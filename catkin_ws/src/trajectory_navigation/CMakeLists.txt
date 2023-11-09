@@ -18,10 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
   ackermann_msgs
 )
 
-# catkin_package()
-
-# include_directories(include ${catkin_INCLUDE_DIRS})
-
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS roscpp std_msgs
@@ -32,7 +28,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-### Navigation State Machine
+### ===== Utils header library =====
+add_library(utils INTERFACE)
+target_include_directories(utils INTERFACE include)
+
+### ===== Navigation State Machine =====
 add_library(navigation_state_machine
   src/nav_state_machine.cpp
 )
@@ -42,11 +42,11 @@ target_link_libraries(navigation_state_machine
 )
 
 add_dependencies(navigation_state_machine
-${${PROJECT_NAME}_EXPORTED_TARGETS}
-${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
 )
 
-### Navigation node
+### ===== Navigation node =====
 add_executable(navigation_node
   src/navigation_node.cpp
 )
@@ -54,9 +54,38 @@ add_executable(navigation_node
 target_link_libraries(navigation_node
   navigation_state_machine
   ${catkin_LIBRARIES}
+  utils
 )
 
 add_dependencies(navigation_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+### ===== Stanley tracker as library =====
+add_library(stanley_tracker
+  src/stanley_tracker.cpp
+)
+
+target_link_libraries(stanley_tracker
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(navigation_state_machine
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+### ====== Pure pursuit tracker as library ======
+add_library(pure_pursuit_tracker
+  src/pure_pursuit_tracker.cpp
+)
+
+target_link_libraries(pure_pursuit_tracker
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(pure_pursuit_tracker
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
