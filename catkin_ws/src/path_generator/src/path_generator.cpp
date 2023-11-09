@@ -1,13 +1,11 @@
-#include <path_generator/path_generator.hpp>
-
 #include <fstream>
-#include <vector>
 #include <iostream>
 #include <sstream>
 
-
 #include <geometry_msgs/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <path_generator/path_generator.hpp>
 
 PathGenerator::PathGenerator()
 {
@@ -20,6 +18,7 @@ PathGenerator::PathGenerator()
   // Service server
   path_req_srv_ = nh.advertiseService("/generate_path", &PathGenerator::readAndPublishPathSvcCallback, this);
 }
+
 
 bool PathGenerator::readAndPublishPathSvcCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
 {
@@ -50,10 +49,8 @@ bool PathGenerator::readWaypointsFromCSV(std::string csv_filename)
     return false;
   }
 
-  std::vector<std::tuple<double, double, double>> path_points;
-  std::string line;
-
   ROS_INFO("Creating path message...");
+  std::string line;
   while (std::getline(file, line))
   {
     std::istringstream ss(line);

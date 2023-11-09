@@ -3,10 +3,11 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <nav_msgs/Path.h>
-#include <geometry_msgs/PoseStamped.h>
 
+#include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 #include <std_srvs/Trigger.h>
+
 
 class PathGenerator
 {
