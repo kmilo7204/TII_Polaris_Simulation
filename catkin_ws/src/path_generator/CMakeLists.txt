@@ -18,4 +18,3 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(path_generator src/path_generator.cpp)
 target_link_libraries(path_generator ${catkin_LIBRARIES})
-
