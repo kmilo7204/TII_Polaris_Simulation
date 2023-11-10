@@ -39,7 +39,5 @@ int main(int argc, char** argv) {
     state_machine.transitionToIdle();
     ROS_INFO("Current state: %d", state_machine.getCurrentState());
 
-    printa();
-
     return 0;
 }

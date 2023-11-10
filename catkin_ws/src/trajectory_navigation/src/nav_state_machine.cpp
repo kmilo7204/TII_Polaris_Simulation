@@ -1,6 +1,7 @@
 #include "trajectory_navigation/nav_state_machine.hpp"
 
-NavigationStateMachine::NavigationStateMachine() : current_state_(IDLE) {
+NavigationStateMachine::NavigationStateMachine() : current_state_(IDLE)
+{
     ROS_INFO("Transitioning to IDLE state");
     path_tracker_ = std::make_shared<PurePursuitTracker>();
     // Initialize trajectory followers
@@ -11,15 +12,14 @@ NavigationStateMachine::NavigationStateMachine() : current_state_(IDLE) {
 void NavigationStateMachine::followPath()
 {
     // Create the object
-    // path_tracker_ = std::make_shared<PurePursuitTracker>();
     if (path_tracker_->hasPath())
     {
         transitionToFollowPath();
     }
-    // else if (tracker.stopCondition())
-    // {
-    //     transitionToStop();
-    // }
+    else if (path_tracker_->stopCondition())
+    {
+        transitionToStop();
+    }
     else
     {
         transitionToIdle();
@@ -59,17 +59,9 @@ NavigationState NavigationStateMachine::getCurrentState() const
 void NavigationStateMachine::startCurrentTrajectoryFollower()
 {
     path_tracker_->followPath();
-    // if (current_follower_index_ < trajectory_followers_.size())
-    // {
-    //     trajectory_followers_[current_follower_index_]->followPath();
-    // }
 }
 
 void NavigationStateMachine::stopCurrentTrajectoryFollower()
 {
     path_tracker_->stop();
-    // if (current_follower_index_ < trajectory_followers_.size())
-    // {
-    //     trajectory_followers_[current_follower_index_]->stop();
-    // }
 }

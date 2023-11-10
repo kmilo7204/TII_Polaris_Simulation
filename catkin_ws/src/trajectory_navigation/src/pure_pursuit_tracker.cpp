@@ -11,6 +11,7 @@
 
 #include <trajectory_navigation/pure_pursuit_tracker.hpp>
 
+#include <utils/utils.hpp>
 
 PurePursuitTracker::PurePursuitTracker()
 {
@@ -20,27 +21,6 @@ PurePursuitTracker::PurePursuitTracker()
   gps_subscriber_ = nh.subscribe("/path", 1, &PurePursuitTracker::pathCallback, this);
 
   ackermann_pub_ = nh.advertise<ackermann_msgs::AckermannDrive>("/gem/ackermann_cmd", 1);
-}
-
-
-std::tuple<double, double, double> PurePursuitTracker::quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
-{
-    double qx = quaternion.x;
-    double qy = quaternion.y;
-    double qz = quaternion.z;
-    double qw = quaternion.w;
-
-    // ROS_INFO("QX: %f, QY: %f, QZ: %f, QW: %f", qx, qy, qz, qw);
-
-    tf2::Quaternion tf_quaternion;
-    tf2::fromMsg(quaternion, tf_quaternion);
-    double roll;
-    double pitch;
-    double yaw;
-    tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
-    // ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
-
-    return std::make_tuple(roll, pitch, yaw);
 }
 
 
@@ -70,7 +50,7 @@ double PurePursuitTracker::find_angle(const std::vector<double>& v1, const std::
 
 void PurePursuitTracker::followPath()
 {
-  std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
+  std::tuple<double, double, double> euler_angles = quaternionToEulerAngles1(odom_.pose.pose.orientation);
 
   double curr_x = odom_.pose.pose.position.x;
   double curr_y = odom_.pose.pose.position.y;
@@ -148,7 +128,7 @@ void PurePursuitTracker::followPath()
     ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x, curr_y, curr_yaw);
 
     // Find the curvature
-    std::tuple<double, double, double> goal_angles = quaternionToEulerAngles(target_pose.pose.orientation);
+    std::tuple<double, double, double> goal_angles = quaternionToEulerAngles1(target_pose.pose.orientation);
 
     double goal_yaw = std::get<2>(goal_angles);
     // ROS_INFO("Goal yaw: %f", goal_yaw);
@@ -171,12 +151,18 @@ void PurePursuitTracker::followPath()
     ackermann_cmd.speed = 2.8;
     ackermann_cmd.steering_angle = angle;
   }
+  else
+  {
+    setStopCondition(true);
+  }
   // Set control_command values as needed
   ackermann_pub_.publish(ackermann_cmd);
 }
 
 void PurePursuitTracker::stop()
 {
+  setStopCondition(false);
+
   path_vct_.clear();
 
   // Send stop command

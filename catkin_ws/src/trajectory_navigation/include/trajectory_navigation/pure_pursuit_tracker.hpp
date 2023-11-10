@@ -21,7 +21,6 @@ public:
     bool hasPath() override;
 
 private:
-    std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion);
     double find_angle(const std::vector<double>& v1, const std::vector<double>& v2);
 
 private:
