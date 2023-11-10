@@ -21,7 +21,7 @@ class NavigationStateMachine
 public:
     NavigationStateMachine();
 
-    void startStateMachine();
+    void followPath();
     void transitionToIdle();
     void transitionToFollowPath();
     void transitionToStop();

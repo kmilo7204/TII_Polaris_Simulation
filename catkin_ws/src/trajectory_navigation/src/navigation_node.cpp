@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
     ROS_INFO("Launch Navigation State Machine");
     while (ros::ok())
     {
+        state_machine.followPath();
         // if (path_.poses.size() > 0)
         // {
         //     follow_trajectory_1();
@@ -23,7 +24,7 @@ int main(int argc, char** argv) {
         // Once instantiated, it passes to Idle state
         // If Idle state, checks the path size. If 0, continues in Idle
         // If path, transition Following state and call the follow path method
-        // 
+        //
         ros::spinOnce();
         rate.sleep();
     }
