@@ -22,7 +22,7 @@ std::tuple<double, double, double> quaternionToEulerAngles1(const geometry_msgs:
     return std::make_tuple(roll, pitch, yaw);
 }
 
-double angleBetweenPoints(const std::vector<double>& v1, const std::vector<double>& v2)
+double angleBetweenVectors(const std::vector<double>& v1, const std::vector<double>& v2)
 {
   // Calculate the angle between two vectors v1 and v2
   double dot_product = v1[0] * v2[0] + v1[1] * v2[1];

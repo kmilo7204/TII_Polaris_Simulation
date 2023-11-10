@@ -14,16 +14,16 @@ class PurePursuitTracker : public PathTracker
 {
 public:
     PurePursuitTracker();
-    void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
-    void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
     void followPath() override;
     void stop() override;
     bool hasPath() override;
 
 private:
-    double find_angle(const std::vector<double>& v1, const std::vector<double>& v2);
+    void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
+    void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
 
-private:
+    int findGoalIndex(const std::vector<int>& index_vct);
+
     // Subscribers
     ros::Subscriber odom_subscriber_;
     ros::Subscriber gps_subscriber_;
@@ -34,8 +34,6 @@ private:
     // Member variables
     nav_msgs::Odometry odom_;
     nav_msgs::Path path_;
-
-    std::vector<geometry_msgs::PoseStamped> path_vct_;
 
     // Waypoints
     std::vector<double> path_points_x_;
