@@ -15,6 +15,8 @@ Generate the path
 rosservice call /generate_path
 
 
+roslaunch trajectory_navigation navigation.launch
+
 ## Requirements
 1. Development of Path-Tracking Algorithm
   a. Develop two distinct path-tracking controllers in C++ that have the capability to follow a specified path.

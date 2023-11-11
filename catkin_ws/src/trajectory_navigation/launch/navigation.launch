@@ -1,0 +1,14 @@
+<launch>
+  <!-- Start the navigation_node -->
+  <node name="navigation_node" pkg="trajectory_navigation" type="navigation_node" output="screen">
+  </node>
+
+  <!-- Launch Gazebo with RViz -->
+  <include file="$(find gem_gazebo)/launch/gem_gazebo_rviz.launch">
+    <arg name="velodyne_points" value="true" />
+  </include>
+
+  <!-- Start the path_generator node -->
+  <node name="path_generator" pkg="path_generator" type="path_generator" output="screen">
+  </node>
+</launch>

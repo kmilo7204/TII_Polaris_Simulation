@@ -157,7 +157,7 @@ void PurePursuit::process()
     ROS_INFO("Alpha: %f", alpha);
 
     // double k = 0.285;
-    double k = 0.5;
+    double k = 0.85;
     double wheelbase = 1.75;
     double angle_i = std::atan((2 * k * wheelbase * std::sin(alpha)) / l);
 
