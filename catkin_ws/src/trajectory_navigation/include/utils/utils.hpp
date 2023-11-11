@@ -10,7 +10,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 
 
-std::tuple<double, double, double> quaternionToEulerAngles1(const geometry_msgs::Quaternion& quaternion)
+std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
 {
     tf2::Quaternion tf_quaternion;
     tf2::fromMsg(quaternion, tf_quaternion);
@@ -29,6 +29,13 @@ double angleBetweenVectors(const std::vector<double>& v1, const std::vector<doub
   double magnitude_v1 = std::sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
   double magnitude_v2 = std::sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
   return std::acos(dot_product / (magnitude_v1 * magnitude_v2));
+}
+
+double piToPi(double angle)
+{
+  if (angle > M_PI) { return angle - 2.0 * M_PI; }
+  if (angle < -M_PI) { return angle + 2.0 * M_PI; }
+  return angle;
 }
 
 #endif

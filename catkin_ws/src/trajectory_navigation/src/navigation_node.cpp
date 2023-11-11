@@ -15,16 +15,6 @@ int main(int argc, char** argv) {
     while (ros::ok())
     {
         state_machine.followPath();
-        // if (path_.poses.size() > 0)
-        // {
-        //     follow_trajectory_1();
-        // }
-        // Start FSM
-        // In the Start method I instante the object
-        // Once instantiated, it passes to Idle state
-        // If Idle state, checks the path size. If 0, continues in Idle
-        // If path, transition Following state and call the follow path method
-        //
         ros::spinOnce();
         rate.sleep();
     }

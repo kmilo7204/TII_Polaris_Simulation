@@ -11,6 +11,9 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 
+#include <utils/utils.hpp>
+
+
 StanleyTracker::StanleyTracker()
 {
   ros::NodeHandle nh;
@@ -35,126 +38,89 @@ void StanleyTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
   path_ = *path_msg;
 }
 
+// void StanleyTracker::process_1()
+// {
+//   std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
 
-void StanleyTracker::run()
+//   double curr_x = odom_.pose.pose.position.x;
+//   double curr_y = odom_.pose.pose.position.y;
+//   double curr_yaw = std::get<2>(euler_angles);
+
+//   // Find the nearest point on the path to the vehicle's position
+//   double min_dist = std::numeric_limits<double>::max();
+//   int target_index = 0;
+
+//   for (int i = 0; i < path_.poses.size(); i++)
+//   {
+//     double dx = (wheelbase_ * std::cos(curr_yaw) + curr_x) - path_.poses[i].pose.position.x;
+//     double dy = (wheelbase_ * std::sin(curr_yaw) + curr_y) - path_.poses[i].pose.position.y;
+//     double dist = std::sqrt(dx * dx + dy * dy);
+
+//     if (dist < min_dist)
+//     {
+//         min_dist = dist;
+//         target_index = i;
+//     }
+//   }
+
+//   ackermann_msgs::AckermannDrive ackermann_cmd;
+//   // Publish control commands
+//   ackermann_cmd.speed = 0.0;
+//   ackermann_cmd.steering_angle = 0.0;
+
+//   ROS_INFO("Index: %ld", target_index);
+
+//   if (target_index < (path_.poses.size() - 1) &&  target_index >= prev_idx)
+//   {
+//     prev_idx = target_index;
+//     // Calculate the cross-track error (cte)
+//     double cte = min_dist * sin(curr_yaw - atan2(curr_y - path_.poses[target_index].pose.position.y,
+//                                                   curr_x - path_.poses[target_index].pose.position.x));
+
+//     ROS_INFO("CTE: %f", cte);
+
+//     // Calculate the desired heading (reference angle)
+//     double ref_yaw = atan2(path_.poses[target_index + 1].pose.position.y - path_.poses[target_index].pose.position.y,
+//                           path_.poses[target_index + 1].pose.position.x - path_.poses[target_index].pose.position.x);
+
+//     double delta_yaw = curr_yaw - ref_yaw;
+
+//     // Ensure the angle difference is within the range [-pi, pi]
+//     while (delta_yaw > M_PI) delta_yaw -= 2 * M_PI;
+//     while (delta_yaw < -M_PI) delta_yaw += 2 * M_PI;
+
+//     // Calculate the steering angle
+//     double steer_angle = ref_yaw + atan2(0.3 * cte, 1.1 * odom_.twist.twist.linear.x + 0.6 * delta_yaw); //0.8
+//     // ROS_INFO("Velocity: %f", odom_.twist.twist.linear.x);
+//     ROS_INFO("Steer: %f", steer_angle);
+
+//     // Publish control commands
+//     ackermann_cmd.speed = 1.5;
+//     ackermann_cmd.steering_angle = steer_angle;
+//   }
+
+//   ackermann_pub_.publish(ackermann_cmd);
+// }
+
+void StanleyTracker::stop()
 {
-  ros::Rate rate(1);
+  setStopCondition(false);
 
-  ROS_INFO("In run()");
-  while (ros::ok())
-  {
-    if (path_.poses.size() > 0)
-    {
-      follow_trajectory_1();
-    }
-
-    ros::spinOnce();
-    rate.sleep();
-  }
-}
-
-
-std::tuple<double, double, double> StanleyTracker::quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion)
-{
-    double qx = quaternion.x;
-    double qy = quaternion.y;
-    double qz = quaternion.z;
-    double qw = quaternion.w;
-
-    tf2::Quaternion tf_quaternion;
-    tf2::fromMsg(quaternion, tf_quaternion);
-    double roll;
-    double pitch;
-    double yaw;
-    tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
-
-    return std::make_tuple(roll, pitch, yaw);
-}
-
-
-double StanleyTracker::pi_2_pi(double angle)
-{
-  if (angle > M_PI)
-  {
-    return angle - 2.0 * M_PI;
-  }
-  if (angle < -M_PI)
-  {
-    return angle + 2.0 * M_PI;
-  }
-
-  return angle;
-}
-
-
-void StanleyTracker::process_1()
-{
-  std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
-
-  double curr_x = odom_.pose.pose.position.x;
-  double curr_y = odom_.pose.pose.position.y;
-  double curr_yaw = std::get<2>(euler_angles);
-
-  // Find the nearest point on the path to the vehicle's position
-  double min_dist = std::numeric_limits<double>::max();
-  int target_index = 0;
-
-  for (int i = 0; i < path_.poses.size(); i++)
-  {
-    double dx = (wheelbase_ * std::cos(curr_yaw) + curr_x) - path_.poses[i].pose.position.x;
-    double dy = (wheelbase_ * std::sin(curr_yaw) + curr_y) - path_.poses[i].pose.position.y;
-    double dist = std::sqrt(dx * dx + dy * dy);
-
-    if (dist < min_dist)
-    {
-        min_dist = dist;
-        target_index = i;
-    }
-  }
-
+  // Send stop command
   ackermann_msgs::AckermannDrive ackermann_cmd;
-  // Publish control commands
   ackermann_cmd.speed = 0.0;
   ackermann_cmd.steering_angle = 0.0;
-
-  ROS_INFO("Index: %ld", target_index);
-
-  if (target_index < (path_.poses.size() - 1) &&  target_index >= prev_idx)
-  {
-    prev_idx = target_index;
-    // Calculate the cross-track error (cte)
-    double cte = min_dist * sin(curr_yaw - atan2(curr_y - path_.poses[target_index].pose.position.y,
-                                                  curr_x - path_.poses[target_index].pose.position.x));
-
-    ROS_INFO("CTE: %f", cte);
-
-    // Calculate the desired heading (reference angle)
-    double ref_yaw = atan2(path_.poses[target_index + 1].pose.position.y - path_.poses[target_index].pose.position.y,
-                          path_.poses[target_index + 1].pose.position.x - path_.poses[target_index].pose.position.x);
-
-    double delta_yaw = curr_yaw - ref_yaw;
-
-    // Ensure the angle difference is within the range [-pi, pi]
-    while (delta_yaw > M_PI) delta_yaw -= 2 * M_PI;
-    while (delta_yaw < -M_PI) delta_yaw += 2 * M_PI;
-
-    // Calculate the steering angle
-    double steer_angle = ref_yaw + atan2(0.3 * cte, 1.1 * odom_.twist.twist.linear.x + 0.6 * delta_yaw); //0.8
-    // ROS_INFO("Velocity: %f", odom_.twist.twist.linear.x);
-    ROS_INFO("Steer: %f", steer_angle);
-
-    // Publish control commands
-    ackermann_cmd.speed = 1.5;
-    ackermann_cmd.steering_angle = steer_angle;
-  }
-
   ackermann_pub_.publish(ackermann_cmd);
 }
 
-
-void StanleyTracker::follow_trajectory_1()
+bool StanleyTracker::hasPath()
 {
-  ROS_INFO("PROCESS");
+  // This also needs to track the current index
+  return path_.poses.size() > 2;
+}
+
+void StanleyTracker::followPath()
+{
   std::tuple<double, double, double> euler_angles = quaternionToEulerAngles(odom_.pose.pose.orientation);
 
   double curr_x = odom_.pose.pose.position.x;
@@ -237,7 +203,7 @@ void StanleyTracker::follow_trajectory_1()
     double f_vel = sqrt(pow(curr_vx, 2) + pow(curr_vy, 2));
     ROS_INFO("Forward velocity: %f", f_vel);
 
-    double theta_e = pi_2_pi(theta_p - curr_yaw);
+    double theta_e = piToPi(theta_p - curr_yaw);
     ROS_INFO("Theta error: %f", theta_e);
 
     double delta = theta_e + std::atan2(0.1 * cte, 1.2 * f_vel);
@@ -317,7 +283,7 @@ void StanleyTracker::follow_trajectory()
     ROS_INFO("Forward velocity: %f", f_vel);
 
     // Error angle
-    double theta_e = pi_2_pi(theta_p - curr_yaw);
+    double theta_e = piToPi(theta_p - curr_yaw);
     ROS_INFO("Theta error: %f", theta_e);
 
     // Steering command

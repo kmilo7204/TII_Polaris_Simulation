@@ -6,9 +6,6 @@
 
 #include <trajectory_navigation/pure_pursuit_tracker.hpp>
 
-// #include "simple_trajectory_follower.h"
-// #include "advanced_trajectory_follower.h"
-
 enum NavigationState
 {
     IDLE,

@@ -11,8 +11,7 @@ NavigationStateMachine::NavigationStateMachine() : current_state_(IDLE)
 
 void NavigationStateMachine::followPath()
 {
-    // Create the object
-    if (path_tracker_->hasPath())
+    if (path_tracker_->hasPath()) // Si no tiene path deberia estar en idle
     {
         transitionToFollowPath();
     }
@@ -46,9 +45,12 @@ void NavigationStateMachine::transitionToFollowPath()
 
 void NavigationStateMachine::transitionToStop()
 {
-    ROS_INFO("Transitioning to STOP state");
-    current_state_ = STOP;
-    stopCurrentTrajectoryFollower();
+    if (current_state_ != STOP)
+    {
+        ROS_INFO("Transitioning to STOP state");
+        current_state_ = STOP;
+        stopCurrentTrajectoryFollower();
+    }
 }
 
 NavigationState NavigationStateMachine::getCurrentState() const
@@ -58,6 +60,7 @@ NavigationState NavigationStateMachine::getCurrentState() const
 
 void NavigationStateMachine::startCurrentTrajectoryFollower()
 {
+    // This needs a fix
     path_tracker_->followPath();
 }
 

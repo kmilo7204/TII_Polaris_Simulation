@@ -19,9 +19,11 @@ public:
     bool hasPath() override;
 
 private:
+    // Subcribers callbacks
     void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
     void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
 
+    // Member methods
     int findGoalIndex(const std::vector<int>& index_vct);
 
     // Subscribers
@@ -45,7 +47,12 @@ private:
     const double k_ { 0.5 }; // 0.285
 
     double look_ahead_dist_ {6.0};
-    int prev_idx_ {0};
+    int prev_idx_ { 0 };
+
+    // Pose variables
+    double curr_x_ { 0.0 };
+    double curr_y_ { 0.0 };
+    double curr_yaw_ { 0.0 };
 };
 
 #endif

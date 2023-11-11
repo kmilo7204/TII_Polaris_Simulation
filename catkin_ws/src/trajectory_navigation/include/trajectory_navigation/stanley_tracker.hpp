@@ -13,20 +13,20 @@
 class StanleyTracker : public PathTracker
 {
 public:
-    StanleyTracker();
-    void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
-    void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
+    //   Currently using follow_trajectory_1();
 
-    void run();
-    void process_1();
+    StanleyTracker();
+    void followPath() override;
+    void stop() override;
+    bool hasPath() override;
+
+    // void process_1();
 
 private:
+    void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
+    void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
     // Member methods
     void follow_trajectory();
-    void follow_trajectory_1();
-
-    double pi_2_pi(double angle);
-    std::tuple<double, double, double> quaternionToEulerAngles(const geometry_msgs::Quaternion& quaternion);
 
     // Subscribers
     ros::Subscriber odom_subscriber_;
@@ -43,6 +43,7 @@ private:
 
     nav_msgs::Odometry odom_;
     nav_msgs::Path path_;
+
     std::vector<geometry_msgs::PoseStamped> path_vct_;
 
     int prev_idx { 0 };
