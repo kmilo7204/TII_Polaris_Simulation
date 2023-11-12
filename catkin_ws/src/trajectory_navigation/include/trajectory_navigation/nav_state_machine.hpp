@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <trajectory_navigation/pure_pursuit_tracker.hpp>
+#include <trajectory_navigation/stanley_tracker.hpp>
 
 enum NavigationState
 {

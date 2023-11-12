@@ -23,7 +23,7 @@ PathGenerator::PathGenerator()
 bool PathGenerator::readAndPublishPathSvcCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
 {
   ROS_INFO("Path creation request received");
-  if (readWaypointsFromCSV("others_1.csv"))
+  if (readWaypointsFromCSV("wps.csv"))
   {
     // Publish the path
     publishPath();
