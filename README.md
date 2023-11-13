@@ -15,7 +15,12 @@ docker build -t ros-gazebo-nvidia-tii:20.04 .
 Run the container with the provided bash script `run.sh`
 
 ```bash
-./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src
+./run.sh ${PATH_TO_CATKIN_WS/SRC}
+```
+
+In my specific case it is:
+```bash
+./run.sh /home/camilo/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src
 ```
 
 ## Project structure
