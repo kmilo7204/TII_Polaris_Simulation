@@ -3,6 +3,10 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/rendering/rendering.hh>
 
+#include <ros/ros.h>
+#include <nav_msgs/Path.h>
+
+
 namespace gazebo
 {
     class PathDrawerPlugin : public WorldPlugin
@@ -12,47 +16,44 @@ namespace gazebo
 
         void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf) override
         {
+            // Subscribe to the /path topic
+            ros::NodeHandle nh;
+            path_sub_ = nh.subscribe("/path", 10, &PathDrawerPlugin::PathCallback, this);
 
-            // Option 2: Insert model from string via function call.
-            // Insert a sphere model from string
+            // Store the world pointer
+            world_ = _world;
+        }
+
+        void PathCallback(const nav_msgs::Path::ConstPtr& path)
+        {
+          ROS_WARN("Drawing path...");
+          int sphere_num = 0;
+          for (int i = 0; i < path->poses.size(); ++i)
+          {
+            if (i % 25 != 0)
+            {
+              continue;
+            }
+
             sdf::SDF sphereSDF;
-            // sphereSDF.SetFromString(
-              // "<sdf version ='1.4'>\
-              //     <model name ='sphere'>\
-              //       <pose>1 0 0 0 0 0</pose>\
-              //       <static>true</static>\
-              //       <link name ='link'>\
-              //         <pose>0 2.5 .5 0 0 0</pose>\
-              //         <gravity>false</gravity>\
-              //         <collision name ='collision'>\
-              //           <geometry>\
-              //             <sphere><radius>0.5</radius></sphere>\
-              //           </geometry>\
-              //         </collision>\
-              //         <visual name ='visual'>\
-              //           <geometry>\
-              //             <sphere><radius>0.1</radius></sphere>\
-              //           </geometry>\
-              //         </visual>\
-              //       </link>\
-              //     </model>\
-              //   </sdf>");
             sphereSDF.SetFromString(
                   "<sdf version ='1.4'>\
                   <model name ='red_sphere'>\
-                    <pose>1 0 0 0 0 0</pose>\
+                    <pose>" + std::to_string(path->poses[i].pose.position.x) + " " +
+                      std::to_string(path->poses[i].pose.position.y) + "0.15 0 0 0</pose>\
                     <static>true</static>\
                     <link name ='link'>\
-                      <pose>0 2.5 .5 0 0 0</pose>\
+                      <pose>0 0 0 0 0 0</pose>\
                       <gravity>false</gravity>\
                       <collision name ='collision'>\
                         <geometry>\
                           <sphere><radius>0.5</radius></sphere>\
                         </geometry>\
+                        <collide>false</collide>\
                       </collision>\
                       <visual name ='visual'>\
                         <geometry>\
-                          <sphere><radius>0.5</radius></sphere>\
+                          <sphere><radius>0.085</radius></sphere>\
                         </geometry>\
                         <material>\
                           <script>\
@@ -66,54 +67,14 @@ namespace gazebo
                 </sdf>");
             // Demonstrate using a custom model name.
             sdf::ElementPtr model = sphereSDF.Root()->GetElement("model");
-            model->GetAttribute("name")->SetFromString("unique_sphere");
-            _world->InsertModelSDF(sphereSDF);
-
-            // Create a pose
-            // ignition::math::Pose3d pose(1, 2, 0, 0, 0, 0);
-
-            // // Create a new model
-            // physics::ModelPtr markerModel = _world->CreateModel("marker_model");
-
-            // // Create a link for the model
-            // physics::LinkPtr markerLink = markerModel->CreateLink("marker_link");
-
-            // // Create a visual for the link
-            // rendering::VisualPtr markerVisual = markerLink->GetVisual("visual");
-            // if (!markerVisual)
-            // {
-            //     markerVisual = markerLink->CreateVisual("visual");
-            // }
-
-            // // Set the visual's pose
-            // markerVisual->SetPose(pose);
-
-            // // Add the model to the world
-            // _world->InsertModelFile("model://marker_model");
-            // Create a new model as a string
-
-            // Get the path to the plugin's shared library
-            // std::string pluginPath = gazebo::common::SystemPaths::Instance()->FindPlugin("path_drawer_plugin")->String();
-
-            // // Extract the directory containing the plugin
-            // std::string pluginDir = gazebo::common::SystemPaths::Instance()->GetPath("path_drawer_plugin");
-
-            // // Path to the URDF file (assuming it's named marker_model.urdf)
-            // std::string urdfPath = pluginDir + "/marker_model.urdf";
-            // _world->InsertModelFile(urdfPath);
-
-            // std::string modelString = "<model name='marker_model'><pose>" + 
-            //                           std::to_string(pose.Pos().X()) + " " +
-            //                           std::to_string(pose.Pos().Y()) + " " +
-            //                           std::to_string(pose.Pos().Z()) + " " +
-            //                           std::to_string(pose.Rot().Roll()) + " " +
-            //                           std::to_string(pose.Rot().Pitch()) + " " +
-            //                           std::to_string(pose.Rot().Yaw()) + "</pose><static>true</static><link name='marker_link'><visual name='visual'><geometry><sphere><radius>0.1</radius></sphere></geometry></visual></link></model>";
-
-            // // Insert the model into the world
-            // _world->InsertModelString(modelString);
-                  // Insert the model into the world
+            model->GetAttribute("name")->SetFromString("unique_sphere_" + std::to_string(sphere_num));
+            world_->InsertModelSDF(sphereSDF);
+            ++sphere_num;
+          }
         }
+    private:
+      ros::Subscriber path_sub_;
+      physics::WorldPtr world_;
     };
 
     GZ_REGISTER_WORLD_PLUGIN(PathDrawerPlugin)
