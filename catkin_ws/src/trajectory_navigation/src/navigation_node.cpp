@@ -3,7 +3,8 @@
 
 #include <utils/utils.hpp>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     ros::init(argc, argv, "navigation_node");
     ros::NodeHandle nh;
 

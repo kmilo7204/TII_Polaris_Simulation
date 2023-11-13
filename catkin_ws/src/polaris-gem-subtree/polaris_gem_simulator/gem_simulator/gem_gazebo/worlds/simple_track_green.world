@@ -420,5 +420,6 @@
       </link>
       <pose frame=''>0 0 0 0 -0 0</pose>
     </model>
+    <plugin name="path_drawer_plugin" filename="libpath_drawer_plugin.so"/>
   </world>
 </sdf>

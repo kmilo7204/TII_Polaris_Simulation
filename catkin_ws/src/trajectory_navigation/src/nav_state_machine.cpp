@@ -7,7 +7,6 @@ NavigationStateMachine::NavigationStateMachine() : current_state_(IDLE)
     // path_tracker_ = std::make_shared<PurePursuitTracker>();
 }
 
-
 void NavigationStateMachine::followPath()
 {
     if (path_tracker_->hasPath()) // Si no tiene path deberia estar en idle
@@ -24,7 +23,6 @@ void NavigationStateMachine::followPath()
     }
 }
 
-
 void NavigationStateMachine::transitionToIdle()
 {
     if (current_state_ != IDLE)
@@ -34,7 +32,6 @@ void NavigationStateMachine::transitionToIdle()
         stopCurrentTrajectoryFollower();
     }
 }
-
 
 void NavigationStateMachine::transitionToFollowPath()
 {
@@ -46,7 +43,6 @@ void NavigationStateMachine::transitionToFollowPath()
     startCurrentTrajectoryFollower();
 }
 
-
 void NavigationStateMachine::transitionToStop()
 {
     if (current_state_ != STOP)
@@ -57,18 +53,15 @@ void NavigationStateMachine::transitionToStop()
     }
 }
 
-
 NavigationState NavigationStateMachine::getCurrentState() const
 {
     return current_state_;
 }
 
-
 void NavigationStateMachine::startCurrentTrajectoryFollower()
 {
     path_tracker_->followPath();
 }
-
 
 void NavigationStateMachine::stopCurrentTrajectoryFollower()
 {

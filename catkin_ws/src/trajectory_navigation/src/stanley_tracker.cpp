@@ -13,7 +13,6 @@
 
 #include <utils/utils.hpp>
 
-
 StanleyTracker::StanleyTracker()
 {
   ros::NodeHandle nh;
@@ -24,19 +23,16 @@ StanleyTracker::StanleyTracker()
   ackermann_pub_ = nh.advertise<ackermann_msgs::AckermannDrive>("/gem/ackermann_cmd", 1);
 }
 
-
-void StanleyTracker::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
+void StanleyTracker::odomCallback(const nav_msgs::Odometry::ConstPtr &odom_msg)
 {
   odom_ = *odom_msg;
 }
 
-
-void StanleyTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
+void StanleyTracker::pathCallback(const nav_msgs::Path::ConstPtr &path_msg)
 {
   ROS_INFO("Receiving information in path message");
   path_ = *path_msg;
 }
-
 
 void StanleyTracker::stop()
 {
@@ -49,7 +45,6 @@ void StanleyTracker::stop()
   ackermann_pub_.publish(ackermann_cmd);
 }
 
-
 bool StanleyTracker::hasPath()
 {
   if (prev_idx_ >= (path_.poses.size() - 10) || (path_.poses.size() < 2))
@@ -58,7 +53,6 @@ bool StanleyTracker::hasPath()
   }
   return true;
 }
-
 
 void StanleyTracker::followPath()
 {
@@ -100,9 +94,10 @@ void StanleyTracker::followPath()
   }
 
   auto min_pair = std::min_element(dist_vct.begin(), dist_vct.end(),
-    [](const auto& a, const auto& b) {
-        return a.second < b.second;
-    });
+                                   [](const auto &a, const auto &b)
+                                   {
+                                     return a.second < b.second;
+                                   });
 
   int index = min_pair->first;
 
@@ -111,7 +106,7 @@ void StanleyTracker::followPath()
   ackermann_cmd.speed = 0.0;
   ackermann_cmd.steering_angle = 0.0;
 
-  if (index != (path_.poses.size() - 1) &&  index >= prev_idx_)
+  if (index != (path_.poses.size() - 1) && index >= prev_idx_)
   {
     prev_idx_ = index;
 
@@ -139,7 +134,6 @@ void StanleyTracker::followPath()
     // ROS_INFO("Forward velocity: %f", f_vel);
     // ROS_INFO("Theta error: %f", theta_e);
     // ROS_INFO("Delta: %f", delta);
-
 
     ROS_INFO("[curr_x: %f, curr_y: %f]", curr_x, curr_y);
     ROS_INFO("[goal_x: %f, goal_y: %f]", path_.poses[index].pose.position.x, path_.poses[index].pose.position.y);

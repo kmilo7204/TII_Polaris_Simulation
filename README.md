@@ -44,7 +44,8 @@ roslaunch trajectory_navigation navigation.launch
 ```bash
 rosservice call /generate_path
 ```
-roslaunch gem_gazebo gem_gazebo_rviz.launch velodyne_points:="true"
+
+Since the main repository for this project was brought as a subtree, feel free to visit it [here](https://gitlab.engr.illinois.edu/gemillins/POLARIS_GEM_e2).
 
 ## Tests
 To run the tests:

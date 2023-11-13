@@ -37,4 +37,4 @@ private:
     void stopCurrentTrajectoryFollower();
 };
 
-#endif  // NAVIGATION_STATE_MACHINE_H
+#endif // NAVIGATION_STATE_MACHINE_H

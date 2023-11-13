@@ -77,5 +77,10 @@
     "variant": "cpp",
     "strstream": "cpp",
     "cfenv": "cpp"
+  },
+  "[cpp]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false
   }
 }

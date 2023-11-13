@@ -10,8 +10,8 @@
 class PathTracker
 {
 public:
-    virtual void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) = 0;
-    virtual void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) = 0;
+    virtual void odomCallback(const nav_msgs::Odometry::ConstPtr &odom_msg) = 0;
+    virtual void pathCallback(const nav_msgs::Path::ConstPtr &path_msg) = 0;
     virtual void followPath() = 0;
     virtual void stop() = 0;
     virtual bool hasPath() = 0;
@@ -24,7 +24,7 @@ public:
     // Member variables
     nav_msgs::Odometry odom_;
     nav_msgs::Path path_;
-    bool stop_conditon_ { false };
+    bool stop_conditon_{false};
 };
 
-#endif  // PATH_TRACKER_INTERFACE_H
+#endif // PATH_TRACKER_INTERFACE_H

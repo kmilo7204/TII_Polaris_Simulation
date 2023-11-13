@@ -23,21 +23,18 @@ PurePursuitTracker::PurePursuitTracker()
   ackermann_pub_ = nh.advertise<ackermann_msgs::AckermannDrive>("/gem/ackermann_cmd", 1);
 }
 
-
-void PurePursuitTracker::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
+void PurePursuitTracker::odomCallback(const nav_msgs::Odometry::ConstPtr &odom_msg)
 {
   odom_ = *odom_msg;
 }
 
-
-void PurePursuitTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
+void PurePursuitTracker::pathCallback(const nav_msgs::Path::ConstPtr &path_msg)
 {
   ROS_INFO("Receiving information in path message");
   path_ = *path_msg;
 }
 
-
-int PurePursuitTracker::findGoalIndex(const std::vector<int>& index_vct)
+int PurePursuitTracker::findGoalIndex(const std::vector<int> &index_vct)
 {
   int goal = -1;
   for (int idx : index_vct)
@@ -47,9 +44,9 @@ int PurePursuitTracker::findGoalIndex(const std::vector<int>& index_vct)
     double y_goal = goal_pose.pose.position.y;
 
     // Path vector
-    std::vector<double> vector_1 = { x_goal - curr_x_, y_goal - curr_y_ };
+    std::vector<double> vector_1 = {x_goal - curr_x_, y_goal - curr_y_};
     // Heading vector
-    std::vector<double> vector_2 = { std::cos(curr_yaw_), std::sin(curr_yaw_) };
+    std::vector<double> vector_2 = {std::cos(curr_yaw_), std::sin(curr_yaw_)};
 
     double temp_angle = angleBetweenVectors(vector_1, vector_2);
     if (std::abs(temp_angle) < ((M_PI / 2) + 0.5))
@@ -71,7 +68,6 @@ int PurePursuitTracker::findGoalIndex(const std::vector<int>& index_vct)
   }
   return goal;
 }
-
 
 void PurePursuitTracker::followPath()
 {
@@ -144,7 +140,6 @@ void PurePursuitTracker::followPath()
   ackermann_pub_.publish(ackermann_cmd);
 }
 
-
 void PurePursuitTracker::stop()
 {
   setStopCondition(false);
@@ -155,7 +150,6 @@ void PurePursuitTracker::stop()
   ackermann_cmd.steering_angle = 0.0;
   ackermann_pub_.publish(ackermann_cmd);
 }
-
 
 bool PurePursuitTracker::hasPath()
 {
