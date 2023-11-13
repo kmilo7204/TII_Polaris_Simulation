@@ -51,6 +51,7 @@ bool PathGenerator::readWaypointsFromCSV(std::string csv_filename)
 
   ROS_INFO("Creating path message...");
   std::string line;
+  path_.poses.clear();
   while (std::getline(file, line))
   {
     std::istringstream ss(line);
@@ -74,7 +75,6 @@ bool PathGenerator::readWaypointsFromCSV(std::string csv_filename)
       waypoint.pose.orientation.w = q.w();
 
       path_.poses.push_back(waypoint);
-      ROS_INFO("X: %f, Y: %f, Z: %f, W: %f", q.x(), q.y(), q.z(), q.w());
     }
     else
     {
@@ -95,16 +95,22 @@ void PathGenerator::publishPath()
 }
 
 
-int main(int argc, char** argv)
+nav_msgs::Path PathGenerator::getPath()
 {
-  ros::init(argc, argv, "path_generator_node");
-  PathGenerator path_generator;
-  ros::Rate rate(1);
-
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    rate.sleep();
-  }
-  return 0;
+  return path_;
 }
+
+
+// int main(int argc, char** argv)
+// {
+//   ros::init(argc, argv, "path_generator_node");
+//   PathGenerator path_generator;
+//   ros::Rate rate(1);
+
+//   while (ros::ok())
+//   {
+//     ros::spinOnce();
+//     rate.sleep();
+//   }
+//   return 0;
+// }

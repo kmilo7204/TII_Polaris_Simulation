@@ -13,10 +13,11 @@ class PathGenerator
 {
 public:
   PathGenerator();
+  nav_msgs::Path getPath();
+  void publishPath();
   bool readAndPublishPathSvcCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
 
 private:
-  void publishPath();
   bool readWaypointsFromCSV(std::string csv_filename);
 
   ros::Publisher path_pub_;

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   roscpp
   roslib
+  rostest
   std_msgs
   sensor_msgs
   nav_msgs
@@ -72,7 +73,6 @@ add_library(stanley_tracker
 
 target_link_libraries(stanley_tracker
   ${catkin_LIBRARIES}
-  # pure_pursuit_tracker
 )
 
 add_dependencies(navigation_state_machine
@@ -94,3 +94,11 @@ add_dependencies(pure_pursuit_tracker
   ${catkin_EXPORTED_TARGETS}
 )
 
+# Add GTest cpp test target
+catkin_add_gtest(test_navigation_trajectory test/test_utils.cpp)
+
+# Link target
+target_link_libraries(test_navigation_trajectory
+  ${catkin_LIBRARIES}
+  utils
+)

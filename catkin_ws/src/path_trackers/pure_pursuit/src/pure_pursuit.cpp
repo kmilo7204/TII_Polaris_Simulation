@@ -29,15 +29,12 @@ std::tuple<double, double, double> PurePursuit::quaternionToEulerAngles(const ge
     double qz = quaternion.z;
     double qw = quaternion.w;
 
-    // ROS_INFO("QX: %f, QY: %f, QZ: %f, QW: %f", qx, qy, qz, qw);
-
     tf2::Quaternion tf_quaternion;
     tf2::fromMsg(quaternion, tf_quaternion);
     double roll;
     double pitch;
     double yaw;
     tf2::Matrix3x3(tf_quaternion).getRPY(roll, pitch, yaw);
-    // ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
 
     return std::make_tuple(roll, pitch, yaw);
 }

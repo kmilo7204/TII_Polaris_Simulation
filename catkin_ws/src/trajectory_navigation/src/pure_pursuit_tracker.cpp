@@ -150,6 +150,7 @@ void PurePursuitTracker::followPath()
   ackermann_pub_.publish(ackermann_cmd);
 }
 
+
 void PurePursuitTracker::stop()
 {
   setStopCondition(false);
@@ -160,6 +161,7 @@ void PurePursuitTracker::stop()
   ackermann_cmd.steering_angle = 0.0;
   ackermann_pub_.publish(ackermann_cmd);
 }
+
 
 bool PurePursuitTracker::hasPath()
 {
