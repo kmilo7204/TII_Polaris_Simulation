@@ -44,7 +44,7 @@ private:
     std::vector<double> dist_arr_;
 
     const double wheelbase_{ 1.75 };
-    const double k_ { 0.5 }; // 0.285
+    const double k_ { 0.5 };
 
     double look_ahead_dist_ {6.0};
     int prev_idx_ { 0 };

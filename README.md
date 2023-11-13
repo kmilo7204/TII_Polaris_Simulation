@@ -15,34 +15,39 @@ docker build -t ros-gazebo-nvidia-tii:20.04 .
 Run the container with the provided bash script `run.sh`
 
 ```bash
-  ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src
+./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src
 ```
 
-## Robot stack
+## Project structure
+The project contains 4 main folders:
+1. Polaris simulation
+  It was brought as a subtree, since a little modification was needed to draw the path in the simulation.
 
+2. Path Generator
+  A ROS node, that reads a `CSV` file and published the found path. A service is running to get a single Trigger request to executed the mentioned actions.
 
+3. Trajectory Navigation
+  A set of ROS nodes that includes the all the functionality to do path tracking. Currently the `Pure Pursuit` and the `Stanley` path trackers are implemented. In addition to it, there is a Navigation state machine that can easily run any of the trackers that follow the structure provided by the interface `PathTracker`.
+
+4. Gazebo Plugins
+  Gazebo plugins to interact with the models or with the world, currently only onw was implemented to draw a path, when the subcriber to the topic `/path` receives any information.
+
+## Launch Robot stack
+The `navigation.launch` is provided under the `trajectory_navigation` package. The launch file will launch all the navigation stack, as well as the path generator node, and the Polaris simulation. To launch all the stack, run the following command:
+
+```bash
+roslaunch trajectory_navigation navigation.launch
+```
+
+- To generate the path, call the following service from another terminal:
+
+```bash
+rosservice call /generate_path
+```
 roslaunch gem_gazebo gem_gazebo_rviz.launch velodyne_points:="true"
 
-Generate the path
-rosservice call /generate_path
-
-
-roslaunch trajectory_navigation navigation.launch
-
-# Tests
+## Tests
+To run the tests:
+```bash
 catkin_make run_tests
-
-
-## Requirements
-1. Development of Path-Tracking Algorithm
-  a. Develop two distinct path-tracking controllers in C++ that have the capability to follow a specified path.
-    i. Input data for your controller will include:
-      1. Path ROS message, with GPS coordinates nav_msgs/Path Documentation
-    2. Odometry ROS message nav_msgs/Odometry Documentation
-  b. The system should allow switching between the developed path-tracking algorithms or adding a new algorithm with minimal code
-  changes. It is not necessarily required for the algorithm to switch during run time.
-
-- I can create a ROS package that contains this implementation
-  - It should contains a set of standard or base methods, so I can create an interface for this
-
-  Controllers -> package pure_pursuit and package stanley
+```
