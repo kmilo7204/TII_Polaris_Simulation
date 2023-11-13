@@ -28,10 +28,9 @@ public:
 
 private:
     NavigationState current_state_;
-    // std::vector<std::shared_ptr<TrajectoryFollower>> trajectory_followers_;
 
     // Create the object
-    std::shared_ptr<PurePursuitTracker> path_tracker_;
+    std::shared_ptr<PathTracker> path_tracker_;
     size_t current_follower_index_ = 0;
 
     void startCurrentTrajectoryFollower();

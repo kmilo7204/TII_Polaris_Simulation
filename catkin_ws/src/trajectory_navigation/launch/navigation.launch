@@ -9,6 +9,6 @@
   </include>
 
   <!-- Start the path_generator node -->
-  <node name="path_generator" pkg="path_generator" type="path_generator" output="screen">
+  <node name="path_generator" pkg="path_generator" type="path_generator_node" output="screen">
   </node>
 </launch>

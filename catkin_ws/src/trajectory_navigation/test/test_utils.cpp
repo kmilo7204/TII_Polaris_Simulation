@@ -1,5 +1,5 @@
-// test_utils.cpp
 #include <gtest/gtest.h>
+
 #include <utils/utils.hpp>
 
 TEST(UtilsTest, QuaternionToEulerAngles)
@@ -17,6 +17,7 @@ TEST(UtilsTest, QuaternionToEulerAngles)
   EXPECT_DOUBLE_EQ(std::get<2>(angles), 0.0);  // Yaw
 }
 
+
 TEST(UtilsTest, AngleBetweenVectors)
 {
   std::vector<double> v1 = {1.0, 0.0};
@@ -27,6 +28,7 @@ TEST(UtilsTest, AngleBetweenVectors)
   // For orthogonal vectors, the angle should be PI/2
   EXPECT_DOUBLE_EQ(angle, M_PI / 2.0);
 }
+
 
 TEST(UtilsTest, PiToPi)
 {
@@ -45,6 +47,7 @@ TEST(UtilsTest, PiToPi)
   // No adjustment
   EXPECT_DOUBLE_EQ(result3, angle3);
 }
+
 
 int main(int argc, char** argv)
 {

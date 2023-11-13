@@ -34,7 +34,6 @@ void PurePursuitTracker::pathCallback(const nav_msgs::Path::ConstPtr& path_msg)
 {
   ROS_INFO("Receiving information in path message");
   path_ = *path_msg;
-  // path_vct_ = path_msg->poses;
 }
 
 
@@ -95,12 +94,9 @@ void PurePursuitTracker::followPath()
     // Index in lookahead distance?
     if (dist >= look_ahead_dist_ - 2.0 && dist <= look_ahead_dist_ + 2.0)
     {
-      ROS_INFO("Can be processed: %ld", i);
       goal_vct.push_back(i);
     }
   }
-
-  // ROS_INFO("Goals processed: %d", goal_vct.size());
 
   // Find the goal index based in distance and path angle
   int goal_index = findGoalIndex(goal_vct);
@@ -111,26 +107,24 @@ void PurePursuitTracker::followPath()
 
   if (goal_index != -1)
   {
-    // Start index for the next search
-    ROS_INFO("Goal index: %x", goal_index);
-
     double l = dist_vct[goal_index];
     geometry_msgs::PoseStamped target_pose = path_.poses[goal_index];
-    ROS_INFO("curr_x: %f, curr_y: %f, curr_yaw: %f", curr_x_, curr_y_, curr_yaw_);
 
     // Find the curvature
     std::tuple<double, double, double> goal_angles = quaternionToEulerAngles(target_pose.pose.orientation);
 
     double goal_yaw = std::get<2>(goal_angles);
-    // ROS_INFO("Goal yaw: %f", goal_yaw);
-    ROS_INFO("goal_x: %f, goal_y: %f, goal_yaw: %f", target_pose.pose.position.x, target_pose.pose.position.y, goal_yaw);
-
     double alpha = goal_yaw - curr_yaw_;
-    ROS_INFO("Alpha: %f", alpha);
-
     double angle_i = std::atan((2 * k_ * wheelbase_ * std::sin(alpha)) / l);
 
-    ROS_INFO("Angle i: %f", angle_i);
+    ROS_INFO("[curr_x: %f, curr_y: %f, curr_yaw: %f]", curr_x_, curr_y_, curr_yaw_);
+    ROS_INFO("[goal_x: %f, goal_y: %f, goal_yaw: %f]", target_pose.pose.position.x, target_pose.pose.position.y, goal_yaw);
+
+    // Enable for debugging
+    // ROS_INFO("Goal index: %x", goal_index);
+    // ROS_INFO("Goal yaw: %f", goal_yaw);
+    // ROS_INFO("Alpha: %f", alpha);
+    // ROS_INFO("Angle i: %f", angle_i);
 
     double angle = angle_i * 2;
 
@@ -139,7 +133,7 @@ void PurePursuitTracker::followPath()
     ROS_INFO("CTE: %f", ct_error);
 
     // Publish control commands
-    ackermann_cmd.speed = 2.8;
+    ackermann_cmd.speed = 1.5;
     ackermann_cmd.steering_angle = angle;
   }
   else
@@ -165,5 +159,9 @@ void PurePursuitTracker::stop()
 
 bool PurePursuitTracker::hasPath()
 {
-  return path_.poses.size() > 2;
+  if (prev_idx_ >= (path_.poses.size() - 10) || (path_.poses.size() < 2))
+  {
+    return false;
+  }
+  return true;
 }

@@ -1,12 +1,24 @@
 # TII_Polaris_Simulation
+Challenge solution
 
 ## Container
-- Build
+The solution includes a container with Ubuntu 20.04, Nvidia capabilities and ROS Noetic, desktop full.
+
+### Build
+Build the container with the following command:
+
+```bash
 docker build -t ros-gazebo-nvidia-tii:20.04 .
+```
 
-- Run
+### Run
+Run the container with the provided bash script `run.sh`
 
+```bash
   ./run.sh /home/ekumen/Camilo_Repos/TII_Polaris_Simulation/catkin_ws/src
+```
+
+## Robot stack
 
 
 roslaunch gem_gazebo gem_gazebo_rviz.launch velodyne_points:="true"

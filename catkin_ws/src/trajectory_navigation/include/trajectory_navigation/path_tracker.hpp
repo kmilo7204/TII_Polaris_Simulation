@@ -17,7 +17,7 @@ public:
     virtual bool hasPath() = 0;
 
     virtual bool stopCondition() { return stop_conditon_; }
-    virtual bool setStopCondition(bool state) { stop_conditon_ = state; };
+    virtual void setStopCondition(bool state) { stop_conditon_ = state; };
 
     virtual ~PathTracker() {}
 

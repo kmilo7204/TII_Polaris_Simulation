@@ -13,20 +13,14 @@
 class StanleyTracker : public PathTracker
 {
 public:
-    //   Currently using follow_trajectory_1();
-
     StanleyTracker();
     void followPath() override;
     void stop() override;
     bool hasPath() override;
 
-    // void process_1();
-
 private:
     void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg) override;
     void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) override;
-    // Member methods
-    void follow_trajectory();
 
     // Subscribers
     ros::Subscriber odom_subscriber_;
@@ -37,18 +31,11 @@ private:
 
     // Member variables
     const double wheelbase_{ 1.75 };
-    const double Kp { 0.01 }; // Proportional control gain
-    const double Kd { 0.3 }; // Derivative control gain
-    const double Ks { 0.05 }; // Speed control gain
 
     nav_msgs::Odometry odom_;
     nav_msgs::Path path_;
 
-    std::vector<geometry_msgs::PoseStamped> path_vct_;
-
-    int prev_idx { 0 };
-
-
+    int prev_idx_ { 0 };
 };
 
 #endif

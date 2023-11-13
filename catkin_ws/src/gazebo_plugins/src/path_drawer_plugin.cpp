@@ -40,20 +40,14 @@ namespace gazebo
                   "<sdf version ='1.4'>\
                   <model name ='red_sphere'>\
                     <pose>" + std::to_string(path->poses[i].pose.position.x) + " " +
-                      std::to_string(path->poses[i].pose.position.y) + "0.15 0 0 0</pose>\
+                      std::to_string(path->poses[i].pose.position.y) + "0.1s 0 0 0</pose>\
                     <static>true</static>\
                     <link name ='link'>\
                       <pose>0 0 0 0 0 0</pose>\
                       <gravity>false</gravity>\
-                      <collision name ='collision'>\
-                        <geometry>\
-                          <sphere><radius>0.5</radius></sphere>\
-                        </geometry>\
-                        <collide>false</collide>\
-                      </collision>\
                       <visual name ='visual'>\
                         <geometry>\
-                          <sphere><radius>0.085</radius></sphere>\
+                          <sphere><radius>0.05</radius></sphere>\
                         </geometry>\
                         <material>\
                           <script>\

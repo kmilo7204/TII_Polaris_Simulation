@@ -23,7 +23,7 @@ PathGenerator::PathGenerator()
 bool PathGenerator::readAndPublishPathSvcCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
 {
   ROS_INFO("Path creation request received");
-  if (readWaypointsFromCSV("wps.csv"))
+  if (readWaypointsFromCSV("wps_reduced.csv"))
   {
     // Publish the path
     publishPath();
@@ -99,18 +99,3 @@ nav_msgs::Path PathGenerator::getPath()
 {
   return path_;
 }
-
-
-// int main(int argc, char** argv)
-// {
-//   ros::init(argc, argv, "path_generator_node");
-//   PathGenerator path_generator;
-//   ros::Rate rate(1);
-
-//   while (ros::ok())
-//   {
-//     ros::spinOnce();
-//     rate.sleep();
-//   }
-//   return 0;
-// }
